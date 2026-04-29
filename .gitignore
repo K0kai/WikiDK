@@ -365,3 +365,5 @@ FodyWeavers.xsd
 # Setting files
 launchSettings.json
 appsettings.json
+/WikiDK/Properties/launchSettings.json
+/WikiDK/appsettings.json
