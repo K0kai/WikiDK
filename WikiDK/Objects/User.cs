@@ -1,13 +1,32 @@
-﻿namespace WikiDK.Objects
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+
+namespace WikiDK.Objects
 {
     public class User
     {
-        public ulong Id { get; set; }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("id")]
+        public int Id { get; set; }
+        [Required]
+        [MaxLength(30)]
+        [Column("name")]
         public string Name { get; set; } = string.Empty;
+        [MaxLength(60)]
+        [EmailAddress]
+        [Column("email")]
         public string Email { get; set; } = string.Empty;
+        [Column("password_hash")]
+        [JsonIgnore]
         public byte[] PasswordHash { get; set; } = [];
+        [Column("password_salt")]
+        [JsonIgnore]
         public byte[] PasswordSalt { get; set;} = [];
-        public UserRole Role { get; set; } = UserRole.User;
+        [Column("role")]
+        public UserRole Role { get; set; } = UserRole.User;       
     }
     public enum UserRole
     {

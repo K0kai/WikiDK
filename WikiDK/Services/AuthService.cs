@@ -13,10 +13,7 @@ namespace WikiDK.Services
         }
         public string Login(string username, string password)
         {
-            var user = _userServiceContext.GetByName(username).Result;
-
-            if (user == null)
-            throw new NullReferenceException(nameof(user));
+            var user = _userServiceContext.GetByName(username).Result ?? throw new Exception($"User with username '{username}' not found");
 
             if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
                 throw new Exception("Password is incorrect");
@@ -71,19 +68,15 @@ namespace WikiDK.Services
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512())
-            {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-            }
+            using var hmac = new System.Security.Cryptography.HMACSHA512();
+            passwordSalt = hmac.Key;
+            passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
         }
         private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512(passwordSalt))
-            {
-                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                return computedHash.SequenceEqual(passwordHash);
-            }
+            using var hmac = new System.Security.Cryptography.HMACSHA512(passwordSalt);
+            var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            return computedHash.SequenceEqual(passwordHash);
         }
     }
 }

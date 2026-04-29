@@ -13,5 +13,12 @@ namespace WikiDK.Repositories
         // public DbSet<Article> Articles { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Article> Articles { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>()
+                .Property(u => u.Role)
+                .HasConversion<string>();
+        }
     }
 }
