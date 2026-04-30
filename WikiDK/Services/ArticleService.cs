@@ -42,6 +42,8 @@ namespace WikiDK.Services
 
         public async Task Update(Article article, string title, string content, int authorId)
         {          
+            if (string.IsNullOrWhiteSpace(title))
+                throw new Exception("Title cannot be empty");
             article.Title = title;
             article.Content = content;
             article.AuthorId = authorId;

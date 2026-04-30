@@ -11,6 +11,7 @@ namespace WikiDK.Objects
         [Column("id")]
         public int Id { get; set; }
         [Required]
+        [NotNull]
         [Column("title")]
         public string Title { get; set; } = string.Empty;
         [Column("content")]
