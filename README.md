@@ -1,6 +1,6 @@
 # WikiDK - Swordplay Clan Wiki Backend
 
-A RESTful API backend for a community wiki platform designed for swordplay and archery enthusiasts. WikiDK enables members of swordplay clans to read, post, and share knowledge about rules, sword fighting techniques, archery tutorials, and other martial arts content.
+A RESTful API backend for a community wiki platform designed for swordplay and archery enthusiasts. WikiDK enables members of the swordplay clan Death Knights (DK) to read, post, and share knowledge about rules, sword fighting techniques, archery tutorials, and other martial arts content.
 
 ## 🎯 Purpose
 
