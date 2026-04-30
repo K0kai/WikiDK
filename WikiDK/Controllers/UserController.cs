@@ -52,7 +52,6 @@ namespace WikiDK.Controllers
             try
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
                 if (userId == null)
                     return BadRequest(new { Message = "User ID not found in token" });
 
