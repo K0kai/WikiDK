@@ -51,11 +51,11 @@ namespace WikiDK.Controllers
         {
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (userId == null)
+                var validId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int id);
+                if (validId)
                     return BadRequest(new { Message = "User ID not found in token" });
 
-                var user = _userService.GetByName(userId).Result;
+                var user = _userService.GetById(id).Result;
                 return Ok(new { Message = "User retrieved successfully", User = user });
             }
             catch (Exception ex)
