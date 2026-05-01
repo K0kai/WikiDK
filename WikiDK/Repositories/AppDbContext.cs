@@ -3,6 +3,9 @@ using WikiDK.Objects;
 
 namespace WikiDK.Repositories
 {
+    /// <summary>
+    /// A class to serve as the database context for the application, inheriting from DbContext. It defines DbSets for User and Article entities and configures the model using OnModelCreating.
+    /// </summary>
     public class AppDbContext: DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
