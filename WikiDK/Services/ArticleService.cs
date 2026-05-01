@@ -24,12 +24,13 @@ namespace WikiDK.Services
         public async Task<Article> Publish(string title, string content, int authorId)
         {
             // Create a new article
+            var utcNowDate = DateTime.UtcNow;
             Article article = new()
             {
                 Title = title,
                 Content = content,
-                Created = DateTime.Now,
-                Updated = DateTime.Now,
+                Created = utcNowDate,
+                Updated = utcNowDate,
                 AuthorId = authorId
             };
             // Add article to the database and save changes
@@ -44,7 +45,7 @@ namespace WikiDK.Services
         /// <returns></returns>
         public async Task<Article?> GetById(int id)
         {
-            return await _dbContext.Articles.FindAsync(id);
+            return await _dbContext.Articles.Include(a => a.Author).FirstOrDefaultAsync(a => a.Id == id);
         }
         /// <summary>
         /// Attempts to return every article from the database.
@@ -81,21 +82,26 @@ namespace WikiDK.Services
         {          
             if (string.IsNullOrWhiteSpace(title))
                 throw new Exception("Title cannot be empty");
-
+            var utcNowDate = DateTime.UtcNow;
             var history = new History()
             {
                 ArticleId = article.Id,
                 EditorId = authorId,
                 PreviousTitle = article.Title,
                 PreviousContent = article.Content,
-                EditDate = DateTime.Now
+                EditDate = utcNowDate
             };
 
             article.Title = title;
             article.Content = content;
             article.AuthorId = authorId;
-            article.Updated = DateTime.Now;            
-            _dbContext.Update(article);
+            article.Updated = utcNowDate;
+
+            if (article.Created.Kind != DateTimeKind.Utc)
+            {
+                article.Created = DateTime.SpecifyKind(article.Created, DateTimeKind.Utc);
+            }
+
             await _dbContext.SaveChangesAsync();
             await _historySvc.CreateHistory(history);
         }
@@ -120,6 +126,34 @@ namespace WikiDK.Services
         {
             _dbContext.Articles.Remove(article);
             await _dbContext.SaveChangesAsync();
+        }
+        /// <summary>
+        /// Reverts changes done to an article by the previous content specified in the history ID. If the history with the given ID isn't found an exception is thrown.
+        /// </summary>
+        /// <param name="historyId"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<Article>RevertChanges(int historyId)
+        {
+            var history = await _historySvc.GetHistoryById(historyId) ?? throw new Exception("History not found");
+            return await RevertChanges(history);
+        }
+        /// <summary>
+        /// Reverts changes done to an article by the previous content specified. If the history or article isn't found an exception is thrown.
+        /// </summary>
+        /// <param name="history"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<Article> RevertChanges(History history)
+        {
+            var article = await GetById(history.ArticleId) ?? throw new Exception("Article not found");
+
+            article.Title = history.PreviousTitle;
+            article.Content = history.PreviousContent;
+            article.Updated = DateTime.UtcNow;
+            _dbContext.Update(article);
+            await _dbContext.SaveChangesAsync();
+            return article;
         }
     }
 }

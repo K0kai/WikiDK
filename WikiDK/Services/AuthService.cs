@@ -20,8 +20,8 @@ namespace WikiDK.Services
 
             var claims = new List<System.Security.Claims.Claim>
             {
-                new(System.Security.Claims.ClaimTypes.NameIdentifier, user.Name),
-                new(System.Security.Claims.ClaimTypes.Email, user.Email),
+                new(System.Security.Claims.ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(System.Security.Claims.ClaimTypes.Name, user.Name),
                 new(System.Security.Claims.ClaimTypes.Role, user.Role.ToString())
             };
 
@@ -49,10 +49,7 @@ namespace WikiDK.Services
             if (string.IsNullOrWhiteSpace(password))
                 throw new Exception("Password cannot be empty");
 
-            var passwordHash = new byte[0];
-            var passwordSalt = new byte[0];
-
-            CreatePasswordHash(password, out passwordHash, out passwordSalt);
+            CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
 
             var user = new User
             {

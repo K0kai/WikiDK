@@ -51,7 +51,10 @@ namespace WikiDK.Controllers
         [HttpPost("publish")]
         public async Task<IActionResult> PublishArticle([FromBody] PublishArticleRequest request)
         {
-            var article = await _articleService.Publish(request.Title, request.Content, request.AuthorId);
+            var validId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int id);
+            if (!validId)
+                return BadRequest("Invalid Id");
+            var article = await _articleService.Publish(request.Title, request.Content, id);
             return Ok(article);
         }
         /// <summary>
@@ -66,7 +69,8 @@ namespace WikiDK.Controllers
         {
             try
             {
-                var user = await _userService.GetByName(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new Exception("User needs to be logged in")) ?? throw new Exception("User not found");
+                var validId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId);
+                var user = await _userService.GetById(userId) ?? throw new Exception("User not found");
                 await _articleService.Update(id, request.Title, request.Content, user.Id);
                 return Ok();
             }
@@ -94,7 +98,6 @@ namespace WikiDK.Controllers
     {
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
-        public int AuthorId { get; set; }
     }
     public class UpdateArticleRequest
     {
