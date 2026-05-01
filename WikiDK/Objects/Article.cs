@@ -7,6 +7,7 @@ namespace WikiDK.Objects
     public class Article
     {
         [Required]
+        [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id")]
         public int Id { get; set; }
