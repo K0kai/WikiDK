@@ -16,6 +16,7 @@ namespace WikiDK.Repositories
         // public DbSet<Article> Articles { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Article> Articles { get; set; }
+        public DbSet<History> Histories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

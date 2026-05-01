@@ -7,10 +7,12 @@ namespace WikiDK.Services
     public class ArticleService
     {
         private readonly AppDbContext _dbContext;
+        private readonly HistoryService _historySvc;
 
-        public ArticleService(AppDbContext context)
+        public ArticleService(AppDbContext context, HistoryService historySvc)
         {
             _dbContext = context;
+            _historySvc = historySvc;
         }
         /// <summary>
         /// Creates and publishes a new article with the given title, content, and author ID. The article is added to the database and saved.
@@ -63,7 +65,7 @@ namespace WikiDK.Services
         /// <exception cref="Exception"></exception>
         public async Task Update(int id, string title, string content, int authorId)
         {
-            var article = await GetById(id) ?? throw new Exception("Article not found");
+            var article = await GetById(id) ?? throw new Exception("Article not found");            
             await Update(article, title, content, authorId);
         }
         /// <summary>
@@ -79,13 +81,23 @@ namespace WikiDK.Services
         {          
             if (string.IsNullOrWhiteSpace(title))
                 throw new Exception("Title cannot be empty");
+
+            var history = new History()
+            {
+                ArticleId = article.Id,
+                EditorId = authorId,
+                PreviousTitle = article.Title,
+                PreviousContent = article.Content,
+                EditDate = DateTime.Now
+            };
+
             article.Title = title;
             article.Content = content;
             article.AuthorId = authorId;
-            article.Updated = DateTime.Now;
-
+            article.Updated = DateTime.Now;            
             _dbContext.Update(article);
             await _dbContext.SaveChangesAsync();
+            await _historySvc.CreateHistory(history);
         }
         /// <summary>
         /// Deletes an article from the database from its id. If the article with the given ID isn't found an exception is thrown.
