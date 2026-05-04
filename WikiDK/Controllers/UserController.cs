@@ -52,7 +52,7 @@ namespace WikiDK.Controllers
             try
             {
                 var validId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int id);
-                if (validId)
+                if (!validId)
                     return BadRequest(new { Message = "User ID not found in token" });
 
                 var user = _userService.GetById(id).Result;
