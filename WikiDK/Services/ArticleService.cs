@@ -56,6 +56,16 @@ namespace WikiDK.Services
             return await _dbContext.Articles.ToListAsync();
         }
         /// <summary>
+        /// Attempts to return the most recent articles from the database, ordered by their last updated date in descending order, limited by the specified number of articles.
+        /// </summary>
+        /// <param name="limit"></param>
+        /// <returns></returns>
+        public async Task<List<Article>> GetRecent(int limit)
+        {
+            return await _dbContext.Articles.OrderByDescending(a => a.Updated).Take(limit).ToListAsync();
+        }
+
+        /// <summary>
         /// Updates an existing article in the database with new title, content and author ID. If the article with the given ID isn't found an exception is thrown.
         /// </summary>
         /// <param name="id"></param>

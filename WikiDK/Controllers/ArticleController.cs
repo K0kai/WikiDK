@@ -43,6 +43,17 @@ namespace WikiDK.Controllers
             return Ok(articles);
         }
         /// <summary>
+        /// API Endpoint to get a limited number of recent articles.
+        /// </summary>
+        /// <param name="limit"></param>
+        /// <returns></returns>
+        [HttpGet("get/recent/limit/{limit}")]
+        public async Task<IActionResult> GetRecentArticles(int limit)
+        {
+            var articles = await _articleService.GetRecent(limit);
+            return Ok(articles);
+        }
+        /// <summary>
         /// API Endpoint to publish an article.
         /// </summary>
         /// <param name="request"></param>

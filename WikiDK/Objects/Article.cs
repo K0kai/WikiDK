@@ -26,6 +26,8 @@ namespace WikiDK.Objects
         public DateTime? Updated { get; set; } = null;
         [Column("author_id")]
         public int AuthorId { get; set; }
+        [Column("thumb_link")]
+        public string ThumbnailLink { get; set; } = string.Empty;
         [JsonIgnore]
         public User Author { get; set; } = null!;
 
