@@ -17,12 +17,15 @@ namespace WikiDK.Repositories
         public DbSet<User> Users { get; set; }
         public DbSet<Article> Articles { get; set; }
         public DbSet<History> Histories { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<ArticleCategory> Article_Category { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()
                 .Property(u => u.Role)
                 .HasConversion<string>();
+            modelBuilder.Entity<ArticleCategory>().HasNoKey();
         }
     }
 }

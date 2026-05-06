@@ -20,8 +20,10 @@ namespace WikiDK.Objects
         public string PreviousTitle { get; set; } = string.Empty;
         [Column("previous_content")]
         public string PreviousContent { get; set; } = string.Empty;
+        [Column("previous_thumb_link")]
+        public string? PreviousThumbnailLink { get; set; } = null;
         [Column("edit_date")]
-        public DateTime EditDate { get; set; } = DateTime.UtcNow;
+        public DateTimeOffset EditDate { get; set; } = DateTime.UtcNow;
         [JsonIgnore]
         public User Editor { get; set; } = null!;
         [JsonIgnore]
