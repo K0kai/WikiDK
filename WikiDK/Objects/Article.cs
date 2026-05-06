@@ -21,13 +21,13 @@ namespace WikiDK.Objects
         public string Content { get; set; } = string.Empty;
         [NotNull]
         [Column("created")]
-        public DateTime Created { get; set; } = DateTime.UtcNow;
+        public DateTimeOffset Created { get; set; } = DateTime.UtcNow;
         [Column("updated")]
-        public DateTime? Updated { get; set; } = null;
+        public DateTimeOffset? Updated { get; set; } = null;
         [Column("author_id")]
         public int AuthorId { get; set; }
         [Column("thumb_link")]
-        public string ThumbnailLink { get; set; } = string.Empty;
+        public string? ThumbnailLink { get; set; } = null;
         [JsonIgnore]
         public User Author { get; set; } = null!;
 

@@ -10,12 +10,15 @@ namespace WikiDK.Controllers
     public class ArticleController : ControllerBase
     {
         private readonly ArticleService _articleService;
+        private readonly ArticleCategoryService _articleCategoryService;
         private readonly UserService _userService;
 
-        public ArticleController(ArticleService articleService, UserService userService)
+        public ArticleController(ArticleService articleService, UserService userService, ArticleCategoryService articleCategoryService)
         {
             _articleService = articleService;
             _userService = userService;
+            _articleCategoryService = articleCategoryService;
+
         }
         /// <summary>
         /// API Endpoint to get an article by its ID.
@@ -25,22 +28,46 @@ namespace WikiDK.Controllers
         [HttpGet("get/{id}")]
         public async Task<IActionResult> GetArticle(int id)
         {
-            var article = await _articleService.GetById(id);
-            if (article == null)
+            try
             {
-                return NotFound();
+
+                var article = await _articleService.GetById(id);
+                if (article == null)
+                {
+                    return NotFound();
+                }
+                return Ok(article);
             }
-            return Ok(article);
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error has occurred in articles/get{id} endpoint");
+                return BadRequest(ex.Message);
+            }
         }
         /// <summary>
-        /// API Endpoint to get all articles.
+        /// API endpoint to get all articles. The limit of articles returned is defined by page size, with the max being 50.
         /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
         /// <returns></returns>
-        [HttpGet("get/all")]
-        public async Task<IActionResult> GetAllArticles()
+        [HttpGet("get")]
+        public async Task<IActionResult> GetAllArticles([FromBody] int page = 1, int pageSize = 50)
         {
-            var articles = await _articleService.GetAll();
-            return Ok(articles);
+            const int MaxPageSize = 50;
+            const int MinPageSize = 10;
+            pageSize = Math.Min(pageSize, MaxPageSize);
+            if (pageSize <= 0)
+                pageSize = MinPageSize;
+            try
+            {
+                var articles = await _articleService.GetPaginated(page, pageSize);
+                return Ok(articles);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
         }
         /// <summary>
         /// API Endpoint to get a limited number of recent articles.
@@ -82,7 +109,7 @@ namespace WikiDK.Controllers
             {
                 var validId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId);
                 var user = await _userService.GetById(userId) ?? throw new Exception("User not found");
-                await _articleService.Update(id, request.Title, request.Content, user.Id);
+                await _articleService.Update(id, request.Title, request.Content, user.Id, request.ThumbnailLink);
                 return Ok();
             }
             catch (Exception ex)
@@ -90,6 +117,11 @@ namespace WikiDK.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        /// <summary>
+        /// API Endpoint to delete an article.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("delete/{id}")]
         [Authorize(Roles = "Admin,Editor,Owner")]
         public async Task<IActionResult> DeleteArticle(int id)
@@ -104,15 +136,47 @@ namespace WikiDK.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpPost("{articleId}/category/{categoryId}")]
+        [Authorize(Roles = "Admin,Editor,Owner")]
+        public async Task<IActionResult> CategorizeArticle(int articleId, int categoryId)
+        {
+            try
+            {
+                await _articleCategoryService.CategorizeArticle(articleId, categoryId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpDelete("{articleId}/category/{categoryId}/delete")]
+        [Authorize(Roles = "Admin,Editor,Owner")]
+        public async Task <IActionResult> UncategorizeArticle(int articleId, int categoryId)
+        {
+            try
+            {
+                await _articleCategoryService.RemoveArticleFromCategory(articleId, categoryId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
     }
     public class PublishArticleRequest
     {
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
+        public string? ThumbnailLink { get; set; } = string.Empty;
     }
     public class UpdateArticleRequest
     {
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
+        public string? ThumbnailLink { get; set; } = string.Empty;
     }
 }

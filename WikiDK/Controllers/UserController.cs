@@ -60,6 +60,7 @@ namespace WikiDK.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in get/me endpoint: {ex.Message}");
                 return BadRequest(new { Message = ex.Message });
             }
         }

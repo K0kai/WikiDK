@@ -21,17 +21,20 @@ namespace WikiDK.Services
         /// <param name="content"></param>
         /// <param name="authorId"></param>
         /// <returns></returns>
-        public async Task<Article> Publish(string title, string content, int authorId)
+        public async Task<Article> Publish(string title, string content, int authorId, string? thumbnailLink = null)
         {
             // Create a new article
             var utcNowDate = DateTime.UtcNow;
+            if (string.IsNullOrWhiteSpace(thumbnailLink))
+                thumbnailLink = null;
             Article article = new()
             {
                 Title = title,
                 Content = content,
                 Created = utcNowDate,
                 Updated = utcNowDate,
-                AuthorId = authorId
+                AuthorId = authorId,
+                ThumbnailLink = thumbnailLink
             };
             // Add article to the database and save changes
             _dbContext.Articles.Add(article);
@@ -56,6 +59,23 @@ namespace WikiDK.Services
             return await _dbContext.Articles.ToListAsync();
         }
         /// <summary>
+        /// Attempts to return a specific amount of articles, defined by page and page size.
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        public async Task<List<Article>> GetPaginated(int page, int pageSize)
+        {
+            var query = _dbContext.Articles.OrderByDescending(a => a.Updated);
+            var totalCount = await query.CountAsync();
+
+            var articles = await query.Skip(page - 1 * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return articles;
+        }
+        /// <summary>
         /// Attempts to return the most recent articles from the database, ordered by their last updated date in descending order, limited by the specified number of articles.
         /// </summary>
         /// <param name="limit"></param>
@@ -74,10 +94,10 @@ namespace WikiDK.Services
         /// <param name="authorId"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task Update(int id, string title, string content, int authorId)
+        public async Task Update(int id, string title, string content, int authorId, string? thumbnailLink = null)
         {
             var article = await GetById(id) ?? throw new Exception("Article not found");            
-            await Update(article, title, content, authorId);
+            await Update(article, title, content, authorId, thumbnailLink);
         }
         /// <summary>
         /// Updates an existing article in the database with new title, content and author ID. If the article with the given ID isn't found an exception is thrown.
@@ -88,7 +108,7 @@ namespace WikiDK.Services
         /// <param name="authorId"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task Update(Article article, string title, string content, int authorId)
+        public async Task Update(Article article, string title, string content, int authorId, string? thumbnailLink = null)
         {          
             if (string.IsNullOrWhiteSpace(title))
                 throw new Exception("Title cannot be empty");
@@ -99,18 +119,16 @@ namespace WikiDK.Services
                 EditorId = authorId,
                 PreviousTitle = article.Title,
                 PreviousContent = article.Content,
-                EditDate = utcNowDate
+                PreviousThumbnailLink = string.IsNullOrWhiteSpace(article.ThumbnailLink) ? null : article.ThumbnailLink,
+                EditDate = utcNowDate                
             };
-
+            if (string.IsNullOrWhiteSpace(thumbnailLink))
+                thumbnailLink = null;
             article.Title = title;
             article.Content = content;
             article.AuthorId = authorId;
             article.Updated = utcNowDate;
-
-            if (article.Created.Kind != DateTimeKind.Utc)
-            {
-                article.Created = DateTime.SpecifyKind(article.Created, DateTimeKind.Utc);
-            }
+            article.ThumbnailLink = thumbnailLink;
 
             await _dbContext.SaveChangesAsync();
             await _historySvc.CreateHistory(history);
