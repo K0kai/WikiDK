@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using WikiDK.Controllers;
 using WikiDK.Objects;
 using WikiDK.Repositories;
 
@@ -17,25 +18,26 @@ namespace WikiDK.Services
         /// <summary>
         /// Creates and publishes a new article with the given title, content, and author ID. The article is added to the database and saved.
         /// </summary>
-        /// <param name="title"></param>
-        /// <param name="content"></param>
-        /// <param name="authorId"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
-        public async Task<Article> Publish(string title, string content, int authorId, string? thumbnailLink = null)
+        public async Task<Article> Publish(PublishArticleRequest request)
         {
             // Create a new article
             var utcNowDate = DateTime.UtcNow;
-            if (string.IsNullOrWhiteSpace(thumbnailLink))
-                thumbnailLink = null;
+            if (string.IsNullOrWhiteSpace(request.ThumbnailLink))
+                request.ThumbnailLink = null;
             Article article = new()
             {
-                Title = title,
-                Content = content,
+                Title = request.Title,
+                Content = request.Content,
                 Created = utcNowDate,
                 Updated = utcNowDate,
-                AuthorId = authorId,
-                ThumbnailLink = thumbnailLink
+                AuthorId = request.AuthorId ?? 0,
+                ThumbnailLink = request.ThumbnailLink,
+                Categories = request.Categories ?? []
             };
+            if (article.AuthorId == 0)
+                throw new Exception("Invalid author Id");
             // Add article to the database and save changes
             _dbContext.Articles.Add(article);
             await _dbContext.SaveChangesAsync();
@@ -94,10 +96,10 @@ namespace WikiDK.Services
         /// <param name="authorId"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task Update(int id, string title, string content, int authorId, string? thumbnailLink = null)
+        public async Task Update(int id, int authorId, UpdateArticleRequest UAR)
         {
-            var article = await GetById(id) ?? throw new Exception("Article not found");            
-            await Update(article, title, content, authorId, thumbnailLink);
+            var article = await GetById(id) ?? throw new Exception("Article not found");
+            await Update(article, authorId, UAR);
         }
         /// <summary>
         /// Updates an existing article in the database with new title, content and author ID. If the article with the given ID isn't found an exception is thrown.
@@ -108,9 +110,9 @@ namespace WikiDK.Services
         /// <param name="authorId"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task Update(Article article, string title, string content, int authorId, string? thumbnailLink = null)
-        {          
-            if (string.IsNullOrWhiteSpace(title))
+        public async Task Update(Article article, int authorId, UpdateArticleRequest UAR)
+        {
+            if (string.IsNullOrWhiteSpace(UAR.Title))
                 throw new Exception("Title cannot be empty");
             var utcNowDate = DateTime.UtcNow;
             var history = new History()
@@ -120,15 +122,35 @@ namespace WikiDK.Services
                 PreviousTitle = article.Title,
                 PreviousContent = article.Content,
                 PreviousThumbnailLink = string.IsNullOrWhiteSpace(article.ThumbnailLink) ? null : article.ThumbnailLink,
-                EditDate = utcNowDate                
+                EditDate = utcNowDate
             };
-            if (string.IsNullOrWhiteSpace(thumbnailLink))
-                thumbnailLink = null;
-            article.Title = title;
-            article.Content = content;
+            if (string.IsNullOrWhiteSpace(UAR.ThumbnailLink))
+                UAR.ThumbnailLink = null;
+            article.Title = string.IsNullOrWhiteSpace(UAR.Title) ? article.Title : UAR.Title;
+            article.Content = UAR.Content ?? article.Content;
             article.AuthorId = authorId;
             article.Updated = utcNowDate;
-            article.ThumbnailLink = thumbnailLink;
+            article.ThumbnailLink = UAR.ThumbnailLink ?? article.ThumbnailLink;
+            article.Categories = UAR.Categories ?? article.Categories;
+
+
+
+            if (UAR.Groups != null)
+            {
+                foreach (var id in UAR.Groups)
+                {
+                    var groupItem = _dbContext.ArticleGroupItems.FirstOrDefault(x => x.ArticleId == article.Id && x.ArticleGroupId == id);
+                    if (groupItem != null)
+                        continue;
+
+                    var lastPosition = _dbContext.ArticleGroupItems.Any() ? _dbContext.ArticleGroupItems.Max(x => x.Position) : 0;
+                    var newGroupItem = new ArticleGroupItem() { ArticleGroupId = id, ArticleId = article.Id, Position = ++lastPosition };
+                    _dbContext.ArticleGroupItems.Add(newGroupItem);
+
+                }
+                var excludedGroups = _dbContext.ArticleGroupItems.Where(x => x.ArticleId == article.Id && !UAR.Groups.Contains(x.ArticleGroupId));
+                _dbContext.RemoveRange(excludedGroups);
+            }
 
             await _dbContext.SaveChangesAsync();
             await _historySvc.CreateHistory(history);
@@ -161,7 +183,7 @@ namespace WikiDK.Services
         /// <param name="historyId"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task<Article>RevertChanges(int historyId)
+        public async Task<Article> RevertChanges(int historyId)
         {
             var history = await _historySvc.GetHistoryById(historyId) ?? throw new Exception("History not found");
             return await RevertChanges(history);

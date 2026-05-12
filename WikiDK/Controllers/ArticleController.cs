@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 using WikiDK.Services;
 
 namespace WikiDK.Controllers
@@ -10,14 +11,16 @@ namespace WikiDK.Controllers
     public class ArticleController : ControllerBase
     {
         private readonly ArticleService _articleService;
+        private readonly ArticleGroupService _articleGroupService;
         private readonly ArticleCategoryService _articleCategoryService;
         private readonly UserService _userService;
 
-        public ArticleController(ArticleService articleService, UserService userService, ArticleCategoryService articleCategoryService)
+        public ArticleController(ArticleService articleService, UserService userService, ArticleCategoryService articleCategoryService, ArticleGroupService articleGroupService)
         {
             _articleService = articleService;
             _userService = userService;
             _articleCategoryService = articleCategoryService;
+            _articleGroupService = articleGroupService;
 
         }
         /// <summary>
@@ -50,17 +53,12 @@ namespace WikiDK.Controllers
         /// <param name="page"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        [HttpGet("get")]
-        public async Task<IActionResult> GetAllArticles([FromBody] int page = 1, int pageSize = 50)
+        [HttpPost("get")]
+        public async Task<IActionResult> GetAllArticles([FromBody] GetArticlesParams getParams)
         {
-            const int MaxPageSize = 50;
-            const int MinPageSize = 10;
-            pageSize = Math.Min(pageSize, MaxPageSize);
-            if (pageSize <= 0)
-                pageSize = MinPageSize;
             try
             {
-                var articles = await _articleService.GetPaginated(page, pageSize);
+                var articles = await _articleCategoryService.GetPaginatedAndFiltered(getParams);
                 return Ok(articles);
             }
             catch (Exception ex)
@@ -92,7 +90,8 @@ namespace WikiDK.Controllers
             var validId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int id);
             if (!validId)
                 return BadRequest("Invalid Id");
-            var article = await _articleService.Publish(request.Title, request.Content, id);
+            request.AuthorId = id;
+            var article = await _articleService.Publish(request);
             return Ok(article);
         }
         /// <summary>
@@ -109,7 +108,7 @@ namespace WikiDK.Controllers
             {
                 var validId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId);
                 var user = await _userService.GetById(userId) ?? throw new Exception("User not found");
-                await _articleService.Update(id, request.Title, request.Content, user.Id, request.ThumbnailLink);
+                await _articleService.Update(id, user.Id, request);
                 return Ok();
             }
             catch (Exception ex)
@@ -133,6 +132,7 @@ namespace WikiDK.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex);
                 return BadRequest(ex.Message);
             }
         }
@@ -151,9 +151,25 @@ namespace WikiDK.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpPost("{articleId}/category")]
+        [Authorize(Roles = "Admin,Editor,Owner")]
+        public async Task<IActionResult> CategorizeArticle(int articleId, [FromBody] int[] categoryIds)
+        {
+            try
+            {
+                Console.WriteLine($"Categories: {string.Join(',', categoryIds)}");
+                await _articleCategoryService.CategorizeArticle(articleId, categoryIds);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
         [HttpDelete("{articleId}/category/{categoryId}/delete")]
         [Authorize(Roles = "Admin,Editor,Owner")]
-        public async Task <IActionResult> UncategorizeArticle(int articleId, int categoryId)
+        public async Task<IActionResult> UncategorizeArticle(int articleId, int categoryId)
         {
             try
             {
@@ -162,21 +178,159 @@ namespace WikiDK.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost("group/{articleId}:{groupId}")]
+        [Authorize(Roles = "Admin,Editor,Owner")]
+        public async Task<IActionResult> GroupArticle(int articleId, int groupId)
+        {
+            try
+            {
+                var highlightObject = await _articleGroupService.GroupArticle(articleId, groupId);
+                return Ok(highlightObject);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost("ungroup/{articleId}:{groupId}")]
+        [Authorize(Roles = "Admin,Editor,Owner")]
+        public async Task<IActionResult> UngroupArticle(int articleId, int groupId)
+        {
+            try
+            {
+                var groupObject = await _articleGroupService.UngroupArticle(articleId, groupId);
+
+                if (!groupObject) throw new Exception($"Failed to remove article {articleId} highlight");
+
+                await _articleGroupService.SortGroup(groupId);
+                return Ok(groupObject);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("groups")]
+        public async Task<IActionResult> GetGroups()
+        {
+            try
+            {
+                var groups = await _articleGroupService.GetGroups();
+                return Ok(groups);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("group/{groupId}")]
+        public async Task<IActionResult> GetGroup(int groupId)
+        {
+            try
+            {
+                var group = await _articleGroupService.GetGroup(groupId) ?? throw new Exception("Group does not exist");
+                return Ok(group);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("group")]
+        public async Task<IActionResult> CreateGroup([FromBody] GroupDTO groupDTO)
+        {
+            try
+            {
+                var group = await _articleGroupService.CreateGroup(groupDTO);
+                return Ok(group);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
+        [Authorize]
+        [HttpPost("group/update/{groupId}")]
+        public async Task<IActionResult> UpdateGroup(int groupId, [FromBody] GroupDTO groupDTO)
+        {
+            try
+            {
+                var updatedGroup = await _articleGroupService.UpdateGroup(groupId, groupDTO);
+                return Ok(updatedGroup);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
                 return BadRequest(ex.Message);
             }
         }
     }
+    public class GroupDTO
+    {
+        public string? Title { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public bool? DisplayHome { get; set; } = false;
+        public bool? DisplaySidebar { get; set; } = false;
+    }
     public class PublishArticleRequest
     {
+        [JsonIgnore]
+        public int? AuthorId { get; set; } = 0;
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public string? ThumbnailLink { get; set; } = string.Empty;
+        public List<int>? Categories { get; set; } = [];
     }
     public class UpdateArticleRequest
     {
-        public string Title { get; set; } = string.Empty;
-        public string Content { get; set; } = string.Empty;
+        public string? Title { get; set; } = string.Empty;
+        public string? Content { get; set; } = string.Empty;
         public string? ThumbnailLink { get; set; } = string.Empty;
+        public List<int>? Categories { get; set; } = [];
+        public List<int>? Groups { get; set; } = [];
+    }
+    public class GetArticlesParams
+    {
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public DateSortType DateSortType { get; set; } = DateSortType.UpdatedNewest;
+        public List<CategoryFilter> CategoryFilters { get; set; } = [];
+
+        public GetArticlesParams()
+        {
+            if (PageSize > 50)
+            {
+                PageSize = 50;
+            }
+            if (PageSize <= 0)
+            {
+                PageSize = 10;
+            }
+        }
+
+    }
+    public enum DateSortType
+    {
+        None,
+        UpdatedNewest,
+        UpdatedOldest,
+        CreatedOldest,
+        CreatedNewest
+    }
+    public class CategoryFilter
+    {
+        public int Id { get; set; }
+        public bool Checked { get; set; }
     }
 }

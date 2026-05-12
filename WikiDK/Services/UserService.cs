@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using WikiDK.Controllers;
 using WikiDK.Objects;
 using WikiDK.Repositories;
 
@@ -27,6 +28,20 @@ namespace WikiDK.Services
         public async Task<User> Create(User user)
         {
             _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            return user;
+        }
+        public async Task<User> Update(User user)
+        {
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+            return user;
+        }
+        public async Task<User> Update(int id, UpdateInfoRequest UIR)
+        {
+            var user = await GetById(id) ?? throw new Exception("User does not exist");
+            user.Email = string.IsNullOrWhiteSpace(UIR.Email) ? user.Email : UIR.Email;
+            user.Name = string.IsNullOrWhiteSpace(UIR.Name) ? user.Name : UIR.Name;
             await _context.SaveChangesAsync();
             return user;
         }

@@ -23,9 +23,11 @@ namespace WikiDK.Objects
         public byte[] PasswordHash { get; set; } = [];
         [Column("password_salt")]
         [JsonIgnore]
-        public byte[] PasswordSalt { get; set;} = [];
+        public byte[] PasswordSalt { get; set; } = [];
         [Column("role")]
-        public UserRole Role { get; set; } = UserRole.User;       
+        public UserRole Role { get; set; } = UserRole.User;
+        [Column("user_icon")]
+        public string UserIcon { get; set; } = ServerSettings.DefaultUserIcon;
     }
     public enum UserRole
     {

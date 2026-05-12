@@ -28,6 +28,8 @@ namespace WikiDK.Objects
         public int AuthorId { get; set; }
         [Column("thumb_link")]
         public string? ThumbnailLink { get; set; } = null;
+        [Column("categories")]
+        public List<int> Categories { get; set; } = [];
         [JsonIgnore]
         public User Author { get; set; } = null!;
 
