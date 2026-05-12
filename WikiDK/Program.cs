@@ -12,6 +12,8 @@ builder.Services.AddScoped<HistoryService>();
 builder.Services.AddScoped<ArticleService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ArticleCategoryService>();
+builder.Services.AddScoped<ArticleGroupService>();
+builder.Services.AddScoped<CloudinaryService>();
 
 
 builder.Services.AddControllers();
@@ -57,5 +59,6 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.UseStaticFiles();
 
 app.Run();

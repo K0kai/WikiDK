@@ -11,7 +11,7 @@ namespace WikiDK.Services
         {
             _appDbContext = appDbContext;
         }
-        public async Task CreateCategory(CategoryCreateRequest CCR)
+        public async Task<Category> CreateCategory(CategoryCreateRequest CCR)
         {
             var newCategory = new Category()
             {
@@ -19,17 +19,24 @@ namespace WikiDK.Services
                 Description = CCR.Description,
                 Slug = CCR.Slug
             };
-            await CreateCategory(newCategory);
+            return await CreateCategory(newCategory);
         }
-        public async Task CreateCategory(Category category)
+        public async Task<Category> CreateCategory(Category category)
         {
             _appDbContext.Categories.Add(category);
             await _appDbContext.SaveChangesAsync();
+            return category;
         }
         public void UpdateCategory(Category category)
         {
             _appDbContext.Categories.Update(category);
             _appDbContext.SaveChanges();
+        }
+        public async Task DeleteCategory(int id)
+        {
+            var cat = _appDbContext.Categories.Find(id);
+            if (cat != null)
+                await DeleteCategory(cat);
         }
         public async Task DeleteCategory(Category category)
         {
