@@ -3,7 +3,7 @@ using WikiDK.Services;
 
 namespace WikiDK.Controllers
 {
-    [Route("history")]
+    [Route("api/history")]
     [ApiController]
     public class HistoryController : ControllerBase
     {

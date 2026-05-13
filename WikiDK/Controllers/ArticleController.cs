@@ -6,7 +6,7 @@ using WikiDK.Services;
 
 namespace WikiDK.Controllers
 {
-    [Route("articles")]
+    [Route("api/articles")]
     [ApiController]
     public class ArticleController : ControllerBase
     {

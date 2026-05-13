@@ -4,7 +4,7 @@ using WikiDK.Services;
 
 namespace WikiDK.Controllers
 {
-    [Route("categories")]
+    [Route("api/categories")]
     [ApiController]
     public class CategoryController : ControllerBase
     {

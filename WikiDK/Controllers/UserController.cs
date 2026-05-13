@@ -6,7 +6,7 @@ using WikiDK.Services;
 namespace WikiDK.Controllers
 {
     [ApiController]
-    [Route("users")]
+    [Route("api/users")]
     public class UserController : ControllerBase
     {
         private AuthService _authService { get; set; }
