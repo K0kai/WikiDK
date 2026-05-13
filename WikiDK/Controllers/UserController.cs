@@ -177,7 +177,7 @@ namespace WikiDK.Controllers
 
                 var user = await _userService.GetById(id) ?? throw new Exception("User doesn't exist");
 
-                user.UserIcon = ServerSettings.DefaultUserIcon; ;
+                user.UserIcon = ServerDefaults.DefaultUserIcon; ;
 
                 await _userService.Update(user);
 
@@ -197,7 +197,7 @@ namespace WikiDK.Controllers
         [HttpGet("default/icon")]
         public async Task<IActionResult> GetDefaultIcon()
         {
-            return Ok(ServerSettings.DefaultUserIcon);
+            return Ok(ServerDefaults.DefaultUserIcon);
         }
     }
     public class RegisterRequest

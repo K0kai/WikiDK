@@ -27,7 +27,7 @@ namespace WikiDK.Objects
         [Column("role")]
         public UserRole Role { get; set; } = UserRole.User;
         [Column("user_icon")]
-        public string UserIcon { get; set; } = ServerSettings.DefaultUserIcon;
+        public string UserIcon { get; set; } = ServerDefaults.DefaultUserIcon;
     }
     public enum UserRole
     {
