@@ -17,6 +17,9 @@ namespace WikiDK.Objects
         [MaxLength(100)]
         [Column("title")]
         public string Title { get; set; } = string.Empty;
+        [MaxLength(100)]
+        [Column("description")]
+        public string? Description { get; set; } = string.Empty;
         [Column("content")]
         public string Content { get; set; } = string.Empty;
         [NotNull]
@@ -26,6 +29,8 @@ namespace WikiDK.Objects
         public DateTimeOffset? Updated { get; set; } = null;
         [Column("author_id")]
         public int AuthorId { get; set; }
+        [Column("last_editor_id")]
+        public int? LastEditorId { get; set; } = int.MinValue;
         [Column("thumb_link")]
         public string? ThumbnailLink { get; set; } = null;
         [Column("categories")]

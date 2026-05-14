@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using WikiDK.Objects;
 using WikiDK.Services;
 
 namespace WikiDK.Controllers
@@ -199,6 +200,29 @@ namespace WikiDK.Controllers
         {
             return Ok(ServerDefaults.DefaultUserIcon);
         }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUser(int id)
+        {
+            try
+            {
+                var user = await _userService.GetById(id);
+                var DTO = new SafeUserDataDTO(user);
+                return Ok(DTO);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
+        
+    }
+    public class SafeUserDataDTO(User? user)
+    {
+        public string? Name { get; set; } = user?.Name;
+        public string? Role { get; set; } = user?.Role.ToString();
+        public string? UserIcon { get; set; } = user?.UserIcon;
+        public int[]? Ranks { get; set; } = user?.Ranks;
     }
     public class RegisterRequest
     {
