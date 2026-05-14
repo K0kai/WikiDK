@@ -14,6 +14,7 @@ builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ArticleCategoryService>();
 builder.Services.AddScoped<ArticleGroupService>();
 builder.Services.AddScoped<CloudinaryService>();
+builder.Services.AddScoped<RankService>();
 
 
 builder.Services.AddControllers();
