@@ -53,7 +53,7 @@ namespace WikiDK.Services
             return await _appDbContext.ArticleGroups.OrderBy(g => g.Title).Include(g => g.Items).ToListAsync();
         }
 
-        public async Task<ArticleGroupItem> GroupArticle(int articleId, int groupId)
+        public async Task<ArticleGroupItem> GroupArticle(int articleId, int groupId, bool preventSave = false)
         {
             var article = await _articleService.GetById(articleId) ?? throw new Exception("Article doesn't exist");
 
@@ -72,8 +72,27 @@ namespace WikiDK.Services
             };
 
             await _appDbContext.ArticleGroupItems.AddAsync(article_group_item);
-            await _appDbContext.SaveChangesAsync();
+            if (!preventSave)
+                await _appDbContext.SaveChangesAsync();
             return article_group_item;
+        }
+        public async Task<List<ArticleGroupItem>> GroupArticleMultiple(int articleId, ICollection<int> groupIds)
+        {
+            var groupItems = new List<ArticleGroupItem>();
+            foreach (var id in groupIds)
+            {
+                try
+                {
+                    var res = await GroupArticle(articleId, id, preventSave: true);
+                    groupItems.Add(res);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Unable to group article: {articleId} and group: {id}\n{ex}");
+                }
+            }
+            await _appDbContext.SaveChangesAsync();
+            return groupItems;
         }
 
         public async Task<bool> UngroupArticle(int articleId, int groupId)

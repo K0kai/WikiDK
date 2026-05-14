@@ -33,6 +33,7 @@ namespace WikiDK.Services
                 Created = utcNowDate,
                 Updated = utcNowDate,
                 AuthorId = request.AuthorId ?? 0,
+                LastEditorId = request.AuthorId ?? 0,
                 ThumbnailLink = request.ThumbnailLink,
                 Categories = request.Categories ?? []
             };

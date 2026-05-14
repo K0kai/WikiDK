@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
+using WikiDK.Objects;
 using WikiDK.Services;
 
 namespace WikiDK.Controllers
@@ -94,7 +95,12 @@ namespace WikiDK.Controllers
                 return BadRequest("Invalid Id");
             request.AuthorId = id;
             var article = await _articleService.Publish(request);
-            return Ok(article);
+            var groupItems = new List<ArticleGroupItem>();
+            if (request.Groups != null && request.Groups.Count > 0)
+            {
+               groupItems = await _articleGroupService.GroupArticleMultiple(article.Id, request.Groups);
+            }
+            return CreatedAtAction("Article created successfully", new { article, articleGroupItems = groupItems});
         }
         /// <summary>
         /// API Endpoint to update an existing article.
@@ -292,6 +298,7 @@ namespace WikiDK.Controllers
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public string? ThumbnailLink { get; set; } = string.Empty;
+        public List<int>? Groups { get; set; } = [];
         public List<int>? Categories { get; set; } = [];
     }
     public class UpdateArticleRequest
