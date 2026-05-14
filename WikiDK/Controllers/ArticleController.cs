@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
 using WikiDK.Services;
@@ -58,6 +59,7 @@ namespace WikiDK.Controllers
         {
             try
             {
+                Debug.WriteLine($"filters:{string.Join(',',getParams.CategoryFilters)}");
                 var articles = await _articleCategoryService.GetPaginatedAndFiltered(getParams);
                 return Ok(articles);
             }
@@ -305,7 +307,7 @@ namespace WikiDK.Controllers
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 10;
         public DateSortType DateSortType { get; set; } = DateSortType.UpdatedNewest;
-        public List<CategoryFilter> CategoryFilters { get; set; } = [];
+        public List<int> CategoryFilters { get; set; } = [];
 
         public GetArticlesParams()
         {

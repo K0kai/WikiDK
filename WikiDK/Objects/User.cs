@@ -28,6 +28,8 @@ namespace WikiDK.Objects
         public UserRole Role { get; set; } = UserRole.User;
         [Column("user_icon")]
         public string UserIcon { get; set; } = ServerDefaults.DefaultUserIcon;
+        [Column("ranks")]
+        public int[] Ranks { get; set; } = [];
     }
     public enum UserRole
     {

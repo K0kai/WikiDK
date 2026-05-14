@@ -63,7 +63,7 @@ namespace WikiDK.Services
 
         public async Task<List<Article>> GetPaginatedAndFiltered(GetArticlesParams getArticlesParams)
         {
-            var filteredCategories = getArticlesParams.CategoryFilters.Where(c => c.Checked).Select(c => c.Id);
+            var filteredCategories = getArticlesParams.CategoryFilters;
 
             IQueryable<Article> query = _appDbContext.Articles;
 
@@ -73,7 +73,7 @@ namespace WikiDK.Services
                     _appDbContext.Articles
                         .Any(ar =>
                             ar.Id == a.Id &&
-                            filteredCategories.Intersect(ar.Categories).Any()
+                            filteredCategories.All(fc => a.Categories.Contains(fc))
                         )
                 );
             }
