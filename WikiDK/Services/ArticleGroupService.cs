@@ -42,6 +42,10 @@ namespace WikiDK.Services
             await _appDbContext.SaveChangesAsync();
             return group;
         }
+        public async Task<List<ArticleGroup>> GetGroups(int[] ids)
+        {
+            return await _appDbContext.ArticleGroups.Where(c => ids.Contains(c.Id)).ToListAsync();
+        }
 
         public async Task<ArticleGroup?> GetGroup(int id)
         {
@@ -177,6 +181,12 @@ namespace WikiDK.Services
             await _appDbContext.SaveChangesAsync();
 
             return articleHighlight;
+        }
+
+        public async Task<List<Article>> GetGroupedArticles()
+        {
+            var groupedArticles = await _appDbContext.ArticleGroupItems.Include(x => x.Article).Select(x => x.Article).ToListAsync();
+            return groupedArticles;
         }
     }
 }

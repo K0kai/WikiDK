@@ -57,7 +57,7 @@ namespace WikiDK.Services
                 Email = email,
                 PasswordHash = passwordHash,
                 PasswordSalt = passwordSalt,
-                Role = UserRole.User
+                Role = UserRole.Guest
             };
 
             return user;

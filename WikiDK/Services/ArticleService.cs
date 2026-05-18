@@ -9,11 +9,13 @@ namespace WikiDK.Services
     {
         private readonly AppDbContext _dbContext;
         private readonly HistoryService _historySvc;
+        private readonly CloudinaryService _cloudinaryService;
 
-        public ArticleService(AppDbContext context, HistoryService historySvc)
+        public ArticleService(AppDbContext context, HistoryService historySvc, CloudinaryService cloudinaryService)
         {
             _dbContext = context;
             _historySvc = historySvc;
+            _cloudinaryService = cloudinaryService;
         }
         /// <summary>
         /// Creates and publishes a new article with the given title, content, and author ID. The article is added to the database and saved.
@@ -32,8 +34,8 @@ namespace WikiDK.Services
                 Content = request.Content,
                 Created = utcNowDate,
                 Updated = utcNowDate,
-                AuthorId = request.AuthorId ?? 0,
-                LastEditorId = request.AuthorId ?? 0,
+                AuthorId = request.AuthorId ?? throw new Exception("Author id cannot be null"),
+                LastEditorId = request.AuthorId ?? throw new Exception("Author id cannot be null"),
                 ThumbnailLink = request.ThumbnailLink,
                 Categories = request.Categories ?? []
             };
@@ -43,6 +45,10 @@ namespace WikiDK.Services
             _dbContext.Articles.Add(article);
             await _dbContext.SaveChangesAsync();
             return article;
+        }
+        public async Task<List<Article>?> GetById(int[] ids)
+        {
+            return await _dbContext.Articles.Where(a => ids.Contains(a.Id)).ToListAsync();
         }
         /// <summary>
         /// Attempts to return an article from the database by its id
@@ -97,10 +103,10 @@ namespace WikiDK.Services
         /// <param name="authorId"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task Update(int id, int authorId, UpdateArticleRequest UAR)
+        public async Task<Article> Update(int id, int authorId, UpdateArticleRequest UAR)
         {
             var article = await GetById(id) ?? throw new Exception("Article not found");
-            await Update(article, authorId, UAR);
+            return await Update(article, authorId, UAR);
         }
         /// <summary>
         /// Updates an existing article in the database with new title, content and author ID. If the article with the given ID isn't found an exception is thrown.
@@ -111,7 +117,7 @@ namespace WikiDK.Services
         /// <param name="authorId"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task Update(Article article, int authorId, UpdateArticleRequest UAR)
+        public async Task<Article> Update(Article article, int authorId, UpdateArticleRequest UAR)
         {
             if (string.IsNullOrWhiteSpace(UAR.Title))
                 throw new Exception("Title cannot be empty");
@@ -152,9 +158,9 @@ namespace WikiDK.Services
                 var excludedGroups = _dbContext.ArticleGroupItems.Where(x => x.ArticleId == article.Id && !UAR.Groups.Contains(x.ArticleGroupId));
                 _dbContext.RemoveRange(excludedGroups);
             }
-
             await _dbContext.SaveChangesAsync();
             await _historySvc.CreateHistory(history);
+            return article;
         }
         /// <summary>
         /// Deletes an article from the database from its id. If the article with the given ID isn't found an exception is thrown.
@@ -205,6 +211,92 @@ namespace WikiDK.Services
             _dbContext.Update(article);
             await _dbContext.SaveChangesAsync();
             return article;
+        }
+        public async Task<bool> SubmitRequest(ArticleSubmission articleSubmission, IFormFile? thumbnailFile = null)
+        {
+            switch (articleSubmission.Type)
+            {
+                case "create":
+                    if (articleSubmission.ArticleId != null)
+                        throw new Exception("Invalid submission type, cannot create when an article is already assigned");
+                    break;
+                case "update":
+                    if (articleSubmission.ArticleId == null)
+                        throw new Exception("Invalid submission type, cannot update when an article is not assigned");
+                    _ = await GetById((int)articleSubmission.ArticleId) ?? throw new Exception("This is not a valid submission, article to be updated doesn't exist");
+                    break;
+                default:
+                    throw new Exception($"Unhandled case: {articleSubmission.Type}");
+            }
+            if (thumbnailFile != null)
+            {
+                var thumbnailUrl = await _cloudinaryService.UploadImage(thumbnailFile);
+                articleSubmission.ArticleThumbnail = thumbnailUrl;
+            }
+            await _dbContext.ArticleSubmissions.AddAsync(articleSubmission);
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+        public async Task<Article> ProcessSubmission(int submissionId)
+        {
+            var submission = await _dbContext.ArticleSubmissions.FindAsync(submissionId) ?? throw new Exception("Submission does not exist");
+
+            switch (submission.Type)
+            {
+                case "create":
+                    var newArticle = new PublishArticleRequest()
+                    {
+                        Title = submission.Title,
+                        Description = submission.Description,
+                        Content = submission.Content ?? "",
+                        AuthorId = submission.SubmitterId ?? -1,
+                        ThumbnailLink = submission.ArticleThumbnail,
+                        Groups = submission.Groups,
+                        Categories = submission.Categories,
+                    };
+                    var article = await Publish(newArticle);
+                    _dbContext.ArticleSubmissions.Remove(submission);
+                    await _dbContext.SaveChangesAsync();
+                    return article;
+                case "update":
+                    var updateArticle = new UpdateArticleRequest()
+                    {
+                        Title = submission.Title,
+                        Content = submission.Content ?? "",
+                        Description = submission.Description,
+                        ThumbnailLink = submission.ArticleThumbnail,
+                        Groups = submission.Groups,
+                        Categories = submission.Categories
+                    };
+                    var uArticle = await Update(submission.ArticleId ?? -1, submission.SubmitterId ?? -1, updateArticle);
+                    _dbContext.ArticleSubmissions.Remove(submission);
+                    await _dbContext.SaveChangesAsync();
+                    return uArticle;
+                default:
+                    throw new Exception($"Unhandled case: {submission.Type}");
+            }
+        }
+        public async Task<bool> RejectSubmission(int submissionId)
+        {
+            var sub = await _dbContext.ArticleSubmissions.FindAsync(submissionId);
+            if (sub == null)
+                return false;
+            _dbContext.ArticleSubmissions.Remove(sub);
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+        public async Task<ArticleSubmission?> GetArticleSubmission(int id)
+        {
+            return await _dbContext.ArticleSubmissions.FindAsync(id);
+        }
+        public async Task<List<ArticleSubmission>> GetPaginatedArticleSubmissions(int page, int pageSize)
+        {
+            var query = _dbContext.ArticleSubmissions.OrderBy(a => a.Id).Skip((page - 1) * pageSize).Take(pageSize);
+            return await query.ToListAsync();
+        }
+        public async Task<int> GetSubmissionsCount()
+        {
+            return await _dbContext.ArticleSubmissions.CountAsync();
         }
     }
 }

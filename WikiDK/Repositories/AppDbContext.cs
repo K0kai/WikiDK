@@ -20,6 +20,7 @@ namespace WikiDK.Repositories
         public DbSet<Category> Categories { get; set; }
         public DbSet<ArticleGroup> ArticleGroups { get; set; }
         public DbSet<ArticleGroupItem> ArticleGroupItems { get; set; }
+        public DbSet<ArticleSubmission> ArticleSubmissions { get; set; }
         public DbSet<Rank> Ranks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
