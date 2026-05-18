@@ -13,6 +13,21 @@ namespace WikiDK.Controllers
         {
             _categoryService = categoryService;
         }
+        [HttpGet("by-ids")]
+        public async Task<IActionResult> GetCategoriesById([FromQuery]string ids)
+        {
+            try
+            {
+                var intIds = ids.Split(',').Select(int.Parse).ToArray();
+                var categories = await _categoryService.GetCategories(intIds);
+                return Ok(categories);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetCategories()

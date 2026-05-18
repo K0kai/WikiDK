@@ -49,6 +49,21 @@ namespace WikiDK.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpGet("get")]
+        public async Task<IActionResult> GetArticles([FromQuery] string ids)
+        {
+            try
+            {
+                var idArray = ids.Split(',').Select(int.Parse).ToArray();
+                var articles = await _articleService.GetById(idArray);
+                return Ok(articles);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
         /// <summary>
         /// API endpoint to get all articles. The limit of articles returned is defined by page size, with the max being 50.
         /// </summary>
@@ -70,16 +85,103 @@ namespace WikiDK.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        /// <summary>
-        /// API Endpoint to get a limited number of recent articles.
-        /// </summary>
-        /// <param name="limit"></param>
-        /// <returns></returns>
-        [HttpGet("get/recent/limit/{limit}")]
-        public async Task<IActionResult> GetRecentArticles(int limit)
+        [HttpPost("submissions")]
+        public async Task<IActionResult> SubmitArticle([FromForm]ArticleSubmissionRequest request)
         {
-            var articles = await _articleService.GetRecent(limit);
-            return Ok(articles);
+            try
+            {
+                var submissionRequest = new ArticleSubmission()
+                {
+                    Title = request.Title,
+                    Description = request.Description,
+                    Content = request.Content,
+                    ArticleId = request.ArticleId,
+                    SubmitterId = request.SubmitterId,
+                    SubmitterName = request.SubmitterName!,
+                    Groups = request.Groups,
+                    Categories = request.Categories,
+                    Type = request.Type,
+                };
+                var submission = await _articleService.SubmitRequest(submissionRequest, request.ThumbnailFile);
+                return CreatedAtAction(nameof(GetArticleSubmission), new { id = submissionRequest.Id }, request);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
+        [Authorize(Roles ="Owner,Admin,Editor")]
+        [HttpPost("submissions/process/{submissionId}")]
+        public async Task<IActionResult> ProcessSubmission([FromRoute]int submissionId)
+        {
+            try
+            {
+                var article = await _articleService.ProcessSubmission(submissionId);
+                return Ok(article);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
+        [Authorize(Roles = "Owner,Admin,Editor")]
+        [HttpPost("submissions/reject/{submissionId}")]
+        public async Task<IActionResult> RejectSubmission([FromRoute] int submissionId)
+        {
+            try
+            {
+                var rejectAction = await _articleService.RejectSubmission(submissionId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("submissions/{id}")]
+        public async Task<IActionResult> GetArticleSubmission([FromRoute] int id)
+        {
+            try
+            {
+                var submission = await _articleService.GetArticleSubmission(id);
+                return Ok(submission);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("submissions/count")]
+        public async Task<IActionResult> GetSubmissionCount()
+        {
+            try
+            {
+                var count = await _articleService.GetSubmissionsCount();
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("submissions")]
+        public async Task<IActionResult> GetArticleSubmissions([FromQuery] int page, int pageSize)
+        {
+            try
+            {
+                var submissions = await _articleService.GetPaginatedArticleSubmissions(page, pageSize);
+                return Ok(submissions);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
         }
         /// <summary>
         /// API Endpoint to publish an article.
@@ -224,6 +326,21 @@ namespace WikiDK.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpGet("groups/by-ids")]
+        public async Task<IActionResult> GetGroupsById([FromQuery] string ids)
+        {
+            try
+            {
+                var intIds = ids.Split(',').Select(int.Parse).ToArray();
+                var groups = await _articleGroupService.GetGroups(intIds);
+                return Ok(groups);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
         [HttpGet("groups")]
         public async Task<IActionResult> GetGroups()
         {
@@ -283,6 +400,21 @@ namespace WikiDK.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpGet("grouped")]
+        public async Task<IActionResult> GetGroupedArticles()
+        {
+            try
+            {
+                var articles = await _articleGroupService.GetGroupedArticles();
+                return Ok(articles);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+
+        }
     }
     public class GroupDTO
     {
@@ -294,20 +426,36 @@ namespace WikiDK.Controllers
     public class PublishArticleRequest
     {
         [JsonIgnore]
-        public int? AuthorId { get; set; } = 0;
+        public int? AuthorId { get; set; }
         public string Title { get; set; } = string.Empty;
-        public string Content { get; set; } = string.Empty;
-        public string? ThumbnailLink { get; set; } = string.Empty;
-        public List<int>? Groups { get; set; } = [];
-        public List<int>? Categories { get; set; } = [];
+        public string? Description { get; set; }
+        public string Content { get; set; } = string.Empty;        
+        public string? ThumbnailLink { get; set; }
+        public List<int>? Groups { get; set; }
+        public List<int>? Categories { get; set; }
+    }
+    public class ArticleSubmissionRequest
+    {
+        public int? SubmitterId { get; set; }
+        public string? SubmitterName { get; set; }
+        public int? ArticleId { get; set; }
+        public string Title { get; set; } = null!;
+        public string? Description { get; set; }
+        public string? Content { get; set; }
+        public IFormFile? ThumbnailFile { get; set; }
+        public List<int>? Groups { get; set; }
+        public List<int>? Categories { get; set; }
+        public string Type { get; set; } = null!;
+
     }
     public class UpdateArticleRequest
     {
-        public string? Title { get; set; } = string.Empty;
-        public string? Content { get; set; } = string.Empty;
-        public string? ThumbnailLink { get; set; } = string.Empty;
-        public List<int>? Categories { get; set; } = [];
-        public List<int>? Groups { get; set; } = [];
+        public string? Title { get; set; }
+        public string? Content { get; set; }
+        public string? Description { get; set; }
+        public string? ThumbnailLink { get; set; }
+        public List<int>? Categories { get; set; }
+        public List<int>? Groups { get; set; }
     }
     public class GetArticlesParams
     {

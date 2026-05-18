@@ -1,4 +1,5 @@
-﻿using WikiDK.Controllers;
+﻿using Microsoft.EntityFrameworkCore;
+using WikiDK.Controllers;
 using WikiDK.Objects;
 using WikiDK.Repositories;
 
@@ -50,6 +51,10 @@ namespace WikiDK.Services
         public async Task<List<Category>> GetAll()
         {
             return [.. _appDbContext.Categories];
+        }
+        public async Task<List<Category>> GetCategories(int[] categoryIds)
+        {
+            return await _appDbContext.Categories.Where(c => categoryIds.Contains(c.Id)).ToListAsync();
         }
     }
 }

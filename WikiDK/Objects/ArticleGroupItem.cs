@@ -14,6 +14,8 @@ namespace WikiDK.Objects
         public int ArticleGroupId { get; set; }
         [JsonIgnore]
         public ArticleGroup ArticleGroup { get; set; } = null!;
+        [JsonIgnore]
+        public Article Article { get; set; } = null!;
         [Column("article_id")]
         public int ArticleId { get; set; }
         [Column("position")]

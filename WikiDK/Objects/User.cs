@@ -25,7 +25,7 @@ namespace WikiDK.Objects
         [JsonIgnore]
         public byte[] PasswordSalt { get; set; } = [];
         [Column("role")]
-        public UserRole Role { get; set; } = UserRole.User;
+        public UserRole Role { get; set; } = UserRole.Guest;
         [Column("user_icon")]
         public string UserIcon { get; set; } = ServerDefaults.DefaultUserIcon;
         [Column("ranks")]
@@ -33,9 +33,10 @@ namespace WikiDK.Objects
     }
     public enum UserRole
     {
-        User,
-        Admin,
+        Guest,
+        Member,
         Editor,
+        Admin,        
         Owner
     }
 }
