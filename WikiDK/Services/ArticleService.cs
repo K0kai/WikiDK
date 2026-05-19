@@ -39,6 +39,7 @@ namespace WikiDK.Services
                 ThumbnailLink = request.ThumbnailLink,
                 Categories = request.Categories ?? []
             };
+            
             if (article.AuthorId == 0)
                 throw new Exception("Invalid author Id");
             // Add article to the database and save changes
