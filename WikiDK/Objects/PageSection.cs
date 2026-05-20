@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.RegularExpressions;
@@ -7,6 +8,7 @@ namespace WikiDK.Objects
 {
     public class PageSection
     {
+        [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id")]
         public int Id { get; set; }
@@ -28,7 +30,7 @@ namespace WikiDK.Objects
             var titleNoDupeSpaces = Regex.Replace(Title, @"\s+", " ");
             var titleMinus = Regex.Replace(titleNoDupeSpaces, @"\s+", "-");
             var slug = $"{titleMinus}-{Id}";
-            Slug = slug;
+            Slug = slug.ToLower();
         }
     }
 }

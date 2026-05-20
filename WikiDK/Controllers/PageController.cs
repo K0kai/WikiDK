@@ -13,14 +13,14 @@ namespace WikiDK.Controllers
         {
             this.pageService = pageService;
         }
-        [Authorize(Roles ="Editor, Admin, Owner")]
+        [Authorize(Roles = "Editor, Admin, Owner")]
         [HttpPost("section")]
         public async Task<IActionResult> CreatePageSection([FromBody] PageSectionCreateRequest request)
         {
             try
             {
                 var pageSection = await pageService.CreateSection(request);
-                return CreatedAtAction(nameof(GetPageSection), pageSection.Id, request);
+                return CreatedAtAction(nameof(GetPageSection), new { id = pageSection.Id }, request);
             }
             catch (Exception ex)
             {
@@ -28,6 +28,37 @@ namespace WikiDK.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [Authorize(Roles = "Editor, Admin, Owner")]
+        [HttpPatch("section/{id}")]
+        public async Task<IActionResult> UpdatePageSection([FromRoute] int id, [FromBody] PageSectionCreateRequest request)
+        {
+            try
+            {
+                var section = await pageService.UpdateSection(id, request);
+                return Ok(section);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
+        [Authorize(Roles = "Owner")]
+        [HttpPatch("section/regen/slug")]
+        public async Task<IActionResult> RegenerateSectionSlug([FromQuery] int id)
+        {
+            try
+            {
+                var section = await pageService.RegenSlug(id);
+                return Ok(section);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpGet("section/{id}")]
         public async Task<IActionResult> GetPageSection([FromRoute] int id)
         {
@@ -70,12 +101,32 @@ namespace WikiDK.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [Authorize(Roles = "Editor, Admin, Owner")]
+        [HttpPost("section/reorder")]
+        public async Task<IActionResult> ReorderSections([FromBody] List<ReorderRequest> requests)
+        {
+            try
+            {
+                var sections = await pageService.ReorderSessions(requests);
+                return Ok(sections);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
     }
     public class PageSectionCreateRequest()
     {
         public string Title { get; set; } = null!;
         public string Content { get; set; } = null!;
         public int Order { get; set; }
-        public bool isVisible { get; set; } = true;
+        public bool IsVisible { get; set; } = true;
+    }
+    public class ReorderRequest()
+    {
+        public int Id { get; set; }
+        public int Order { get; set; }
     }
 }

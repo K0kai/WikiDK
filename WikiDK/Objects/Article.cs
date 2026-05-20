@@ -49,7 +49,7 @@ namespace WikiDK.Objects
             var titleNoDupeSpaces = Regex.Replace(Title, @"\s+", " ");
             var titleMinus = Regex.Replace(titleNoDupeSpaces, @"\s+", "-");
             var slug = $"{titleMinus}-{Created.ToString("dd-MM-yyyy")}-{Id}";
-            Slug = slug;
+            Slug = slug.ToLower();
         }
 
     }

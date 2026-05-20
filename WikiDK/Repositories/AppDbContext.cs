@@ -59,7 +59,7 @@ namespace WikiDK.Repositories
 
             foreach (var article in newArticles)
             {
-                if (string.IsNullOrEmpty(article.Slug))
+                if (string.IsNullOrWhiteSpace(article.Slug))
                 {
                     article.GenerateSlug();
                 }
@@ -67,13 +67,17 @@ namespace WikiDK.Repositories
 
             foreach (var section in newSections)
             {
-                if (string.IsNullOrEmpty(section.Slug))
+                if (string.IsNullOrWhiteSpace(section.Slug))
                 {
                     section.GenerateSlug();
                 }
             }
 
             if (newArticles.Count != 0)
+            {
+                await base.SaveChangesAsync(cancellationToken);
+            }
+            if (newSections.Count != 0)
             {
                 await base.SaveChangesAsync(cancellationToken);
             }
