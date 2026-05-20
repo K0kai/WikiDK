@@ -22,6 +22,7 @@ namespace WikiDK.Repositories
         public DbSet<ArticleGroupItem> ArticleGroupItems { get; set; }
         public DbSet<ArticleSubmission> ArticleSubmissions { get; set; }
         public DbSet<Rank> Ranks { get; set; }
+        public DbSet<PageSection> PageSections { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -38,6 +39,50 @@ namespace WikiDK.Repositories
     .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);
+        }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var newArticles = ChangeTracker
+                .Entries<Article>()
+                .Where(e => e.State == EntityState.Added)
+                .Select(e => e.Entity)
+                .ToList();
+
+            var newSections = ChangeTracker
+                .Entries<PageSection>()
+                .Where(e => e.State == EntityState.Added)
+                .Select(e => e.Entity)
+                .ToList();
+
+            var result = await base.SaveChangesAsync(cancellationToken);
+
+            foreach (var article in newArticles)
+            {
+                if (string.IsNullOrWhiteSpace(article.Slug))
+                {
+                    article.GenerateSlug();
+                }
+            }
+
+            foreach (var section in newSections)
+            {
+                if (string.IsNullOrWhiteSpace(section.Slug))
+                {
+                    section.GenerateSlug();
+                }
+            }
+
+            if (newArticles.Count != 0)
+            {
+                await base.SaveChangesAsync(cancellationToken);
+            }
+            if (newSections.Count != 0)
+            {
+                await base.SaveChangesAsync(cancellationToken);
+            }
+
+            return result;
         }
     }
 }

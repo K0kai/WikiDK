@@ -15,13 +15,17 @@ builder.Services.AddScoped<ArticleCategoryService>();
 builder.Services.AddScoped<ArticleGroupService>();
 builder.Services.AddScoped<CloudinaryService>();
 builder.Services.AddScoped<RankService>();
-
+builder.Services.AddScoped<PageService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 // Injects the db context into the DI container, using the connection string from appsettings.json
+#if DEBUG
+builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DevConnection")));
+#else
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+#endif
 
 builder.Services.AddCors(options =>
 {

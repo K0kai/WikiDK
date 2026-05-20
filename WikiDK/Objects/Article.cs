@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace WikiDK.Objects
 {
@@ -37,6 +38,19 @@ namespace WikiDK.Objects
         public List<int> Categories { get; set; } = [];
         [JsonIgnore]
         public User Author { get; set; } = null!;
+        [MaxLength(255)]
+        [Column("slug")]
+        public string Slug { get; set; } = null!;
+
+        public Article() { }
+
+        public void GenerateSlug()
+        {
+            var titleNoDupeSpaces = Regex.Replace(Title, @"\s+", " ");
+            var titleMinus = Regex.Replace(titleNoDupeSpaces, @"\s+", "-");
+            var slug = $"{titleMinus}-{Created.ToString("dd-MM-yyyy")}-{Id}";
+            Slug = slug.ToLower();
+        }
 
     }
 }
