@@ -107,7 +107,7 @@ namespace WikiDK.Controllers
         {
             try
             {
-                var sections = await pageService.ReorderSessions(requests);
+                var sections = await pageService.ReorderSections(requests);
                 return Ok(sections);
             }
             catch (Exception ex)

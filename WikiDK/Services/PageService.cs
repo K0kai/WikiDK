@@ -46,7 +46,7 @@ namespace WikiDK.Services
             await appDbContext.SaveChangesAsync();
             return section;
         }
-        public async Task<List<PageSection>> ReorderSessions(List<ReorderRequest> reorders)
+        public async Task<List<PageSection>> ReorderSections(List<ReorderRequest> reorders)
         {
             var ids = reorders.Select(r => r.Id).Where(i => i > 0);
             var sections = await appDbContext.PageSections.Where(s => ids.Contains(s.Id)).ToListAsync();
@@ -57,7 +57,7 @@ namespace WikiDK.Services
                 if (reorderRequest == null)
                     continue;
 
-                var treatedOrder = Math.Max(1, Math.Min(10, reorderRequest.Order));
+                var treatedOrder = Math.Max(1, Math.Min(GetSectionLimit(), reorderRequest.Order));
                 section.Order = treatedOrder;
             }
             await appDbContext.SaveChangesAsync();
