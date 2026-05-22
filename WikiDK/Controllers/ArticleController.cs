@@ -25,6 +25,25 @@ namespace WikiDK.Controllers
             _articleGroupService = articleGroupService;
 
         }
+        [HttpGet("get/by-slug/{slug}")]
+        public async Task<IActionResult> GetArticleBySlug(string slug)
+        {
+            try
+            {
+                slug = slug.Trim();
+                var article = await _articleService.GetBySlug(slug);
+                if (article == null)
+                {
+                    return NotFound();
+                }
+                return Ok(article);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error has occurred in articles/get/by-slug/{slug} endpoint\n{ex}");
+                return BadRequest(ex.Message);
+            }
+        }
         /// <summary>
         /// API Endpoint to get an article by its ID.
         /// </summary>

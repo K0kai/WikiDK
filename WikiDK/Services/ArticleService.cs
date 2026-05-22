@@ -60,6 +60,10 @@ namespace WikiDK.Services
         {
             return await _dbContext.Articles.Include(a => a.Author).FirstOrDefaultAsync(a => a.Id == id);
         }
+        public async Task<Article?> GetBySlug(string slug)
+        {
+            return await _dbContext.Articles.FirstOrDefaultAsync(a => a.Slug == slug);
+        }
         /// <summary>
         /// Attempts to return every article from the database.
         /// </summary>
