@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using WikiDK;
 using WikiDK.Repositories;
 using WikiDK.Services;
 
@@ -16,6 +18,10 @@ builder.Services.AddScoped<ArticleGroupService>();
 builder.Services.AddScoped<CloudinaryService>();
 builder.Services.AddScoped<RankService>();
 builder.Services.AddScoped<PageService>();
+builder.Services.AddScoped<UserCacheService>();
+builder.Services.AddTransient<IClaimsTransformation, UserClaimsTransformation>();
+
+builder.Services.AddMemoryCache();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

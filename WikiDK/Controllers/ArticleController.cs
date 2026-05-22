@@ -75,6 +75,7 @@ namespace WikiDK.Controllers
             {
                 var idArray = ids.Split(',').Select(int.Parse).ToArray();
                 var articles = await _articleService.GetById(idArray);
+                if (articles?.Count == 0) { return NotFound(); }
                 return Ok(articles);
             }
             catch (Exception ex)
