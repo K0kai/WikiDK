@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 using WikiDK.Controllers;
 using WikiDK.Objects;
 using WikiDK.Repositories;
@@ -10,6 +11,8 @@ namespace WikiDK.Services
         private readonly AppDbContext _dbContext;
         private readonly HistoryService _historySvc;
         private readonly CloudinaryService _cloudinaryService;
+
+        private readonly int maxSubmissionPageSize = 10;
 
         public ArticleService(AppDbContext context, HistoryService historySvc, CloudinaryService cloudinaryService)
         {
@@ -242,9 +245,14 @@ namespace WikiDK.Services
             await _dbContext.SaveChangesAsync();
             return true;
         }
-        public async Task<Article> ProcessSubmission(int submissionId)
+        public async Task<Article?> ProcessSubmission(int submissionId, User reviewer)
         {
             var submission = await _dbContext.ArticleSubmissions.FindAsync(submissionId) ?? throw new Exception("Submission does not exist");
+            
+            Article article;
+
+            if (submission.Status != "pending")
+                return null;
 
             switch (submission.Type)
             {
@@ -259,10 +267,8 @@ namespace WikiDK.Services
                         Groups = submission.Groups,
                         Categories = submission.Categories,
                     };
-                    var article = await Publish(newArticle);
-                    _dbContext.ArticleSubmissions.Remove(submission);
-                    await _dbContext.SaveChangesAsync();
-                    return article;
+                    article = await Publish(newArticle);
+                    break;
                 case "update":
                     var updateArticle = new UpdateArticleRequest()
                     {
@@ -273,20 +279,31 @@ namespace WikiDK.Services
                         Groups = submission.Groups,
                         Categories = submission.Categories
                     };
-                    var uArticle = await Update(submission.ArticleId ?? -1, submission.SubmitterId ?? -1, updateArticle);
-                    _dbContext.ArticleSubmissions.Remove(submission);
-                    await _dbContext.SaveChangesAsync();
-                    return uArticle;
+                    article = await Update(submission.ArticleId ?? -1, submission.SubmitterId ?? -1, updateArticle);                    
+                    break;
                 default:
                     throw new Exception($"Unhandled case: {submission.Type}");
             }
+
+            submission.ReviewerId = reviewer.Id;
+            submission.Status = "approved";
+
+            await _dbContext.SaveChangesAsync();
+            return article;
         }
-        public async Task<bool> RejectSubmission(int submissionId)
+        public async Task<bool> RejectSubmission(int submissionId, User reviewer)
         {
             var sub = await _dbContext.ArticleSubmissions.FindAsync(submissionId);
+
             if (sub == null)
                 return false;
-            _dbContext.ArticleSubmissions.Remove(sub);
+
+            if (sub.Status != "pending")
+                return false;
+
+            sub.ReviewerId = reviewer.Id;
+            sub.Status = "rejected";
+
             await _dbContext.SaveChangesAsync();
             return true;
         }
@@ -294,14 +311,19 @@ namespace WikiDK.Services
         {
             return await _dbContext.ArticleSubmissions.FindAsync(id);
         }
-        public async Task<List<ArticleSubmission>> GetPaginatedArticleSubmissions(int page, int pageSize)
+        public async Task<int> GetTotalSubmissionPages(string status, string? type = "any")
         {
-            var query = _dbContext.ArticleSubmissions.OrderBy(a => a.Id).Skip((page - 1) * pageSize).Take(pageSize);
+            var maxPages = (int) Math.Max(1, Math.Ceiling((double) (await GetSubmissionsCount(status, type) / maxSubmissionPageSize) ));
+            return maxPages;
+        }
+        public async Task<List<ArticleSubmission>> GetPaginatedArticleSubmissions(int page, string status, string? type = "any")
+        {
+            var query = _dbContext.ArticleSubmissions.Where(a => a.Status == status && (type == "any" || a.Type == type)).OrderBy(a => a.Id).Skip((page - 1) * maxSubmissionPageSize).Take(maxSubmissionPageSize);
             return await query.ToListAsync();
         }
-        public async Task<int> GetSubmissionsCount()
-        {
-            return await _dbContext.ArticleSubmissions.CountAsync();
+        public async Task<int> GetSubmissionsCount(string status, string? type = "any")
+        {            
+            return await _dbContext.ArticleSubmissions.Where(a => a.Status == status && (type == "any" || a.Type == type)).CountAsync();
         }
     }
 }
