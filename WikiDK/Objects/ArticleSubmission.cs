@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace WikiDK.Objects
 {
@@ -37,6 +38,13 @@ namespace WikiDK.Objects
         public List<int>? Groups { get; set; }
         [Column("categories")]
         public List<int>? Categories { get; set; }
+        [MaxLength(40)]
+        [Column("status")]
+        public string Status { get; set; } = "pending";
+        [Column("reviewed_by")]
+        public int? ReviewerId { get; set; }
+        [JsonIgnore]
+        public User Reviewer { get; set; } = null!;
 
     }
 }

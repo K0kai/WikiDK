@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
@@ -137,7 +138,12 @@ namespace WikiDK.Controllers
         {
             try
             {
-                var article = await _articleService.ProcessSubmission(submissionId);
+                var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id);
+                if (!userId)
+                    return BadRequest(new { Message = "User ID not found in token" });
+
+                var user = await _userService.GetById(id) ?? throw new Exception("User does not exist");
+                var article = await _articleService.ProcessSubmission(submissionId, user);
                 return Ok(article);
             }
             catch (Exception ex)
@@ -152,7 +158,12 @@ namespace WikiDK.Controllers
         {
             try
             {
-                var rejectAction = await _articleService.RejectSubmission(submissionId);
+                var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id);
+                if (!userId)
+                    return BadRequest(new { Message = "User ID not found in token" });
+
+                var user = await _userService.GetById(id) ?? throw new Exception("User does not exist");
+                var rejectAction = await _articleService.RejectSubmission(submissionId, user);
                 return Ok();
             }
             catch (Exception ex)
@@ -176,11 +187,25 @@ namespace WikiDK.Controllers
             }
         }
         [HttpGet("submissions/count")]
-        public async Task<IActionResult> GetSubmissionCount()
+        public async Task<IActionResult> GetSubmissionCount([FromQuery, Required] string status, [FromQuery] string? type = "any")
         {
             try
             {
-                var count = await _articleService.GetSubmissionsCount();
+                var count = await _articleService.GetSubmissionsCount(status, type);
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("submissions/max-page")]
+        public async Task<IActionResult> GetSubmissionsMaxPages([FromQuery, Required] string status, [FromQuery] string? type = "any")
+        {
+            try
+            {
+                var count = await _articleService.GetTotalSubmissionPages(status, type);
                 return Ok(count);
             }
             catch (Exception ex)
@@ -190,11 +215,11 @@ namespace WikiDK.Controllers
             }
         }
         [HttpGet("submissions")]
-        public async Task<IActionResult> GetArticleSubmissions([FromQuery] int page, int pageSize)
+        public async Task<IActionResult> GetArticleSubmissions([FromQuery] int page, string status, string? type = "any")
         {
             try
             {
-                var submissions = await _articleService.GetPaginatedArticleSubmissions(page, pageSize);
+                var submissions = await _articleService.GetPaginatedArticleSubmissions(page, status, type);
                 return Ok(submissions);
             }
             catch (Exception ex)
