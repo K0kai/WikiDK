@@ -1,70 +1,72 @@
-# WikiDK - Swordplay Clan Wiki Backend
+# WikiDK
 
-A RESTful API backend for a community wiki platform designed for swordplay and archery enthusiasts. WikiDK enables members of the swordplay clan Death Knights (DK) to read, post, and share knowledge about rules, sword fighting techniques, archery tutorials, and other martial arts content.
+A C# ASP.NET Core backend for a collaborative wiki platform serving the swordplay clan Death Knights (DK). WikiDK provides a RESTful API for managing wiki content, user authentication, and role-based access control.
 
-## 🎯 Purpose
+## Overview
 
-WikiDK serves as the backbone of a collaborative wiki platform where:
-- **Clan members** can access organized tutorials and rules
-- **Contributors** can post and share their expertise
-- **Outsiders** can learn from the community's collective knowledge
-- **Admins** can manage content and user permissions
+WikiDK enables clan members to read, post, and share knowledge about swordplay and archery. The platform supports different user roles with varying levels of access:
 
-## ✨ Features
+- **Clan members** can access tutorials and community guidelines
+- **Contributors** can create and share content
+- **Guests** can view public knowledge
+- **Administrators** can manage content and user permissions
 
-- **User Authentication & Authorization** - Secure registration and JWT-based login
-- **User Management** - Create accounts and retrieve user profiles
-- **Content Management** *(In Progress)* - API endpoints for wiki articles and tutorials
-- **Role-Based Access Control** - Different permission levels for members and admins
-- **RESTful API Design** - Clean, intuitive endpoints for frontend integration
+## Features
 
-## 🛠️ Tech Stack
+- User authentication with JWT tokens
+- User management and profile endpoints
+- Role-based access control
+- RESTful API design for frontend integration
+- Content management (in progress)
+
+## Technology Stack
 
 - **Framework:** ASP.NET Core
 - **Language:** C#
 - **Containerization:** Docker
 - **Authentication:** JWT (JSON Web Tokens)
 
-## 📋 Current Status
+## Project Status
 
-🚧 **Work in Progress** - Core user authentication is complete, content management features are in active development.
+The project is in active development. User authentication is complete, with content management features currently in progress.
 
-### Completed
-- ✅ User registration endpoint
-- ✅ User login with JWT token generation
-- ✅ Protected endpoints with authorization
+**Completed:**
+- User registration and login endpoints
+- JWT token generation and validation
+- Protected endpoints with authorization
 
-### In Development
-- 🔄 Wiki article CRUD operations
-- 🔄 Content categorization (tutorials, rules, etc.)
-- 🔄 User roles and permissions system
-- 🔄 Comment/discussion features
+**In Development:**
+- Wiki article CRUD operations
+- Content categorization and tagging
+- User roles and permissions system
+- Comment and discussion features
 
-## 🚀 Getting Started
+## Getting Started
 
-### Prerequisites
-- .NET 8.0+
+### Requirements
+
+- .NET 8.0 or later
 - Docker (optional)
 
-### Setup
+### Installation
 
-1. **Clone the repository**
+1. Clone the repository:
    ```bash
    git clone https://github.com/K0kai/WikiDK.git
    cd WikiDK
    ```
 
-2. **Build the project**
+2. Build the project:
    ```bash
    dotnet build
    ```
 
-3. **Run the application**
+3. Run the application:
    ```bash
    dotnet run
    ```
 
-The API will be available at `http://localhost:5000`
+The API will be accessible at `http://localhost:5000`
 
 ### Docker
 
@@ -73,23 +75,24 @@ docker build -t wikidk .
 docker run -p 5000:5000 wikidk
 ```
 
-## 📚 API Endpoints
+## API Endpoints
 
 ### Authentication
+
 - `POST /users/register` - Register a new user
-- `POST /users/login` - Login and receive JWT token
-- `GET /users/get/me` - Get current user profile (requires authentication)
+- `POST /users/login` - Authenticate and receive JWT token
+- `GET /users/get/me` - Retrieve current user profile (requires authentication)
 
-*Additional endpoints coming soon*
+Additional endpoints are planned for upcoming releases.
 
-## 📝 License
+## License
 
-This project is open source and available under the [MIT License](LICENSE).
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## 👤 Author
+## Author
 
 [K0kai](https://github.com/K0kai)
 
----
+## Contributing
 
-**Contributing:** Feel free to reach out if you're interested in contributing to WikiDK!
+Contributions are welcome. If you'd like to contribute to WikiDK, feel free to reach out or submit a pull request.
