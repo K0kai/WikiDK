@@ -33,15 +33,26 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 #endif
 
+#if DEBUG
+
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(builder =>
+    options.AddPolicy("Debug", policy =>
     {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
+        policy.WithOrigins("http://localhost:5173");
     });
 });
+
+#endif
+#if !DEBUG
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Prod", policy =>
+    {
+        policy.WithOrigins("https://wikidkreact.onrender.com");
+    });
+});
+#endif
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
@@ -66,7 +77,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors();
+#if DEBUG
+app.UseCors("Debug");
+#endif
+#if !DEBUG
+app.UseCors("Prod");
+#endif
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
