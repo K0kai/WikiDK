@@ -39,7 +39,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("Debug", policy =>
     {
-        policy.WithOrigins("http://localhost:5173");
+        policy.WithOrigins("http://localhost:5173")
+        .AllowAnyHeader()
+        .AllowAnyMethod();
     });
 });
 
@@ -49,7 +51,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("Prod", policy =>
     {
-        policy.WithOrigins("https://wikidkreact.onrender.com");
+        policy.WithOrigins("https://wikidkreact.onrender.com")
+        .AllowAnyHeader()
+        .AllowAnyMethod();
     });
 });
 #endif
