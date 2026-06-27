@@ -86,7 +86,7 @@ namespace WikiDK.Services
             var query = _dbContext.Articles.OrderByDescending(a => a.Updated);
             var totalCount = await query.CountAsync();
 
-            var articles = await query.Skip(page - 1 * pageSize)
+            var articles = await query.Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
