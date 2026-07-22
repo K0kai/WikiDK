@@ -1,4 +1,5 @@
-﻿using WikiDK.Objects;
+﻿using WikiDK.Helpers;
+using WikiDK.Objects;
 
 namespace WikiDK.Services.Interfaces
 {
@@ -9,7 +10,8 @@ namespace WikiDK.Services.Interfaces
         public Task<WikiPage?> GetWikiPageBySlug(string slug);
         public Task<List<WikiPage>> GetAllWikiPagesAsync();
         public Task<WikiPage> CreateWikiPageAsync(WikiPageCreateRequest request);
-        public bool DeleteWikiPageAsync(int id);
-        public bool UpdateWikiPageAsync(int id, WikiPageUpdateRequest request);
+        public bool DeleteWikiPage(int id);
+        public bool UpdateWikiPage(int id, WikiPageUpdateRequest request);
+        public bool UpdateWikiPage(string slug, WikiPageUpdateRequest request);
     }
 }

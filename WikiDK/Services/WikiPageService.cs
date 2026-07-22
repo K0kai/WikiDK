@@ -44,7 +44,7 @@ namespace WikiDK.Services
             return Task.FromResult(wikiPage);
         }
 
-        public bool DeleteWikiPageAsync(int id)
+        public bool DeleteWikiPage(int id)
         {
             var wikiPage = _appDbContext.WikiPages.Find(id);
             if (wikiPage == null)
@@ -80,7 +80,7 @@ namespace WikiDK.Services
             return Task.FromResult(wikiPage);
         }
 
-        public bool UpdateWikiPageAsync(int id, WikiPageUpdateRequest request)
+        public bool UpdateWikiPage(int id, WikiPageUpdateRequest request)
         {
             var wikiPage = _appDbContext.WikiPages.Find(id);
             if (wikiPage == null)
@@ -93,6 +93,20 @@ namespace WikiDK.Services
             wikiPage.UpdatedAt = DateTimeOffset.UtcNow;
             wikiPage.EditorId = request.EditorId;
 
+            _appDbContext.SaveChanges();
+            return true;
+        }
+        public bool UpdateWikiPage(string slug, WikiPageUpdateRequest request)
+        {
+            var wikiPage = _appDbContext.WikiPages.FirstOrDefault(wp => wp.Slug == slug);
+            if (wikiPage == null)
+            {
+                return false;
+            }
+            wikiPage.Title = request.Title;
+            wikiPage.Content = request.Content ?? string.Empty;
+            wikiPage.UpdatedAt = DateTimeOffset.UtcNow;
+            wikiPage.EditorId = request.EditorId;
             _appDbContext.SaveChanges();
             return true;
         }
