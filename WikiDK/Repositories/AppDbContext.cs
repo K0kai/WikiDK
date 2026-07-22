@@ -23,6 +23,11 @@ namespace WikiDK.Repositories
         public DbSet<ArticleSubmission> ArticleSubmissions { get; set; }
         public DbSet<Rank> Ranks { get; set; }
         public DbSet<PageSection> PageSections { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<Permission> Permissions { get; set; }
+        public DbSet<Policy> Policies { get; set; }
+        public DbSet<Policy_Permission> PolicyPermissions { get; set; }
+        public DbSet<Role_Policy> RolePolicies { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
