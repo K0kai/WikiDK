@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WikiDK.Objects
 {
+    [Obsolete]
     public class ArticleCategory
     {
         [Column("category_id")]
