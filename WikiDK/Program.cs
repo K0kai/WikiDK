@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using WikiDK;
 using WikiDK.Repositories;
 using WikiDK.Services;
+using WikiDK.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,7 @@ builder.Services.AddScoped<CloudinaryService>();
 builder.Services.AddScoped<RankService>();
 builder.Services.AddScoped<PageService>();
 builder.Services.AddScoped<UserCacheService>();
+builder.Services.AddScoped<IWikiPageService, WikiPageService>();
 builder.Services.AddTransient<IClaimsTransformation, UserClaimsTransformation>();
 
 builder.Services.AddMemoryCache();

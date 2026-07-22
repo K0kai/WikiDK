@@ -1,6 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using WikiDK.Objects;
+using WikiDK.Services.Interfaces;
 
 namespace WikiDK.Services
 {

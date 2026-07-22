@@ -1,6 +1,6 @@
 ﻿using WikiDK.Objects;
 
-namespace WikiDK.Services
+namespace WikiDK.Services.Interfaces
 {
     public interface IAuthService
     {
