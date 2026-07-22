@@ -12,8 +12,6 @@ namespace WikiDK.Repositories
         {
         }
         // Define your DbSets here
-        // public DbSet<User> Users { get; set; }
-        // public DbSet<Article> Articles { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Article> Articles { get; set; }
         public DbSet<History> Histories { get; set; }
@@ -28,6 +26,7 @@ namespace WikiDK.Repositories
         public DbSet<Policy> Policies { get; set; }
         public DbSet<Policy_Permission> PolicyPermissions { get; set; }
         public DbSet<Role_Policy> RolePolicies { get; set; }
+        public DbSet<WikiPage> WikiPages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

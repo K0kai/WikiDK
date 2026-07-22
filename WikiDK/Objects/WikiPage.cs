@@ -19,6 +19,9 @@ namespace WikiDK.Objects
         public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
         [Required]
         public int AuthorId { get; set; }
+        [StringLength(100)]
+        [Required]
+        public string AuthorName { get; set; } = null!;
         [Required]        
         public int EditorId { get; set; }
 
