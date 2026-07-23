@@ -12,17 +12,17 @@ namespace WikiDK.Controllers
     {
         private readonly IWikiPageService _wikiPageService;
 
-        public WikiPageController(WikiPageService wikiPageService)
+        public WikiPageController(IWikiPageService wikiPageService)
         {
             _wikiPageService = wikiPageService;
         }
 
         [HttpGet("{slug}")]
-        public IActionResult GetBySlug(string slug)
+        public async Task<IActionResult> GetBySlug(string slug)
         {
             try
             {
-                var page = _wikiPageService.GetWikiPageBySlug(slug);
+                var page = await _wikiPageService.GetWikiPageBySlug(slug);
                 if (page == null)
                 {
                     return NotFound();
