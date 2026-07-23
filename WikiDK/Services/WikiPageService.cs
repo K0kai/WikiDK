@@ -56,6 +56,18 @@ namespace WikiDK.Services
             return true;
         }
 
+        public bool DeleteWikiPage(string slug)
+        {
+            var wikiPage = _appDbContext.WikiPages.FirstOrDefault(w => w.Slug == slug);
+            if (wikiPage == null)
+            {
+                return false;
+            }
+            _appDbContext.WikiPages.Remove(wikiPage);
+            _appDbContext.SaveChanges();
+            return true;
+        }
+
         public Task<List<WikiPage>> GetAllWikiPagesAsync()
         {
             var wikiPages = _appDbContext.WikiPages.ToList();
