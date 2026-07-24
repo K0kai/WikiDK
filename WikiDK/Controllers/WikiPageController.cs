@@ -51,8 +51,8 @@ namespace WikiDK.Controllers
         {
             try
             {
-                var page = _wikiPageService.UpdateWikiPage(slug, request);
-                return Ok(page);
+                var actionBool = _wikiPageService.UpdateWikiPage(slug, request);
+                return Ok(actionBool);
             }
             catch (Exception ex)
             {

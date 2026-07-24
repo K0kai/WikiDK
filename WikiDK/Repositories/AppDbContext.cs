@@ -24,8 +24,9 @@ namespace WikiDK.Repositories
         public DbSet<Role> Roles { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<Policy> Policies { get; set; }
-        public DbSet<Policy_Permission> PolicyPermissions { get; set; }
-        public DbSet<Role_Policy> RolePolicies { get; set; }
+        public DbSet<PolicyPermissionRelation> PolicyPermissions { get; set; }
+        public DbSet<RolePolicyRelation> RolePolicies { get; set; }
+        public DbSet<UserRoleRelation> UsersRoles { get; set; }
         public DbSet<WikiPage> WikiPages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -41,6 +42,12 @@ namespace WikiDK.Repositories
     .WithMany()
     .HasForeignKey(h => h.ArticleId)
     .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Permission>()
+                .Property(p => p.Name)
+                .HasConversion<string>(
+                v => v.Trim().ToLowerInvariant(),
+                v => v);
 
             base.OnModelCreating(modelBuilder);
         }
