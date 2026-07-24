@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 using System.Security.Claims;
 using WikiDK.Objects;
 using WikiDK.Services;
@@ -216,7 +215,7 @@ namespace WikiDK.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        
+
     }
     public class SafeUserDataDTO(User? user)
     {

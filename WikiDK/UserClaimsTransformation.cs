@@ -28,7 +28,7 @@ namespace WikiDK
             });
             if (user == null) return principal;
 
-            var identity = (ClaimsIdentity?) principal.Identity;
+            var identity = (ClaimsIdentity?)principal.Identity;
 
             if (identity == null || !identity.IsAuthenticated)
                 return principal;
@@ -36,7 +36,7 @@ namespace WikiDK
             var roleClaim = identity.FindFirst(ClaimTypes.Role);
             identity.TryRemoveClaim(roleClaim);
             identity.AddClaim(new Claim(ClaimTypes.Role, user.Role.ToString()));
-            
+
 
             return principal;
         }

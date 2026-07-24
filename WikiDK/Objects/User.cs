@@ -36,7 +36,7 @@ namespace WikiDK.Objects
         Guest,
         Member,
         Editor,
-        Admin,        
+        Admin,
         Owner
     }
 }

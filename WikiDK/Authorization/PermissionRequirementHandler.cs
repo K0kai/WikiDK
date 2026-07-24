@@ -7,7 +7,7 @@ namespace WikiDK.Authorization
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
         {
             if (logger.IsEnabled(LogLevel.Information))
-            logger.LogInformation("Checking if user has permissions: {permissions}", string.Join(" | ", requirement.Permissions));
+                logger.LogInformation("Checking if user has permissions: {permissions}", string.Join(" | ", requirement.Permissions));
 
             return Task.CompletedTask;
         }

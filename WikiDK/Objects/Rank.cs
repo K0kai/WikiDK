@@ -15,6 +15,6 @@ namespace WikiDK.Objects
         [Column("description")]
         public string? Description { get; set; } = string.Empty;
         [Column("icon")]
-        public string Icon {  get; set; } = string.Empty;
+        public string Icon { get; set; } = string.Empty;
     }
 }

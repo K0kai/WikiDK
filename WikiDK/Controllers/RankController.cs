@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using System.Text.Json;
 using WikiDK.Objects;
 using WikiDK.Services;
 
@@ -35,7 +33,7 @@ namespace WikiDK.Controllers
 
             return Ok(rank);
         }
-        [Authorize(Roles ="Editor,Admin,Owner")]
+        [Authorize(Roles = "Editor,Admin,Owner")]
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] RankCreateDTO rankDTO)
         {
@@ -45,7 +43,7 @@ namespace WikiDK.Controllers
                 Description = rankDTO.Description,
             };
             if (rankDTO.Icon != null && rankDTO.Icon.Length > 0)
-            {                
+            {
                 var rankIcon = await _cloudinaryService.UploadImage(rankDTO.Icon);
                 rank.Icon = rankIcon ?? "";
             }

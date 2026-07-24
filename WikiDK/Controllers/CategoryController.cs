@@ -14,7 +14,7 @@ namespace WikiDK.Controllers
             _categoryService = categoryService;
         }
         [HttpGet("by-ids")]
-        public async Task<IActionResult> GetCategoriesById([FromQuery]string ids)
+        public async Task<IActionResult> GetCategoriesById([FromQuery] string ids)
         {
             try
             {

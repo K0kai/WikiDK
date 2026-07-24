@@ -96,7 +96,7 @@ namespace WikiDK.Controllers
         {
             try
             {
-                Debug.WriteLine($"filters:{string.Join(',',getParams.CategoryFilters)}");
+                Debug.WriteLine($"filters:{string.Join(',', getParams.CategoryFilters)}");
                 var articles = await _articleCategoryService.GetPaginatedAndFiltered(getParams);
                 return Ok(articles);
             }
@@ -107,7 +107,7 @@ namespace WikiDK.Controllers
             }
         }
         [HttpPost("submissions")]
-        public async Task<IActionResult> SubmitArticle([FromForm]ArticleSubmissionRequest request)
+        public async Task<IActionResult> SubmitArticle([FromForm] ArticleSubmissionRequest request)
         {
             try
             {
@@ -132,9 +132,9 @@ namespace WikiDK.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        [Authorize(Roles ="Owner,Admin,Editor")]
+        [Authorize(Roles = "Owner,Admin,Editor")]
         [HttpPost("submissions/process/{submissionId}")]
-        public async Task<IActionResult> ProcessSubmission([FromRoute]int submissionId)
+        public async Task<IActionResult> ProcessSubmission([FromRoute] int submissionId)
         {
             try
             {
@@ -245,9 +245,9 @@ namespace WikiDK.Controllers
             var groupItems = new List<ArticleGroupItem>();
             if (request.Groups != null && request.Groups.Count > 0)
             {
-               groupItems = await _articleGroupService.GroupArticleMultiple(article.Id, request.Groups);
+                groupItems = await _articleGroupService.GroupArticleMultiple(article.Id, request.Groups);
             }
-            return CreatedAtAction("Article created successfully", new { article, articleGroupItems = groupItems});
+            return CreatedAtAction("Article created successfully", new { article, articleGroupItems = groupItems });
         }
         /// <summary>
         /// API Endpoint to update an existing article.
@@ -474,7 +474,7 @@ namespace WikiDK.Controllers
         public int? AuthorId { get; set; }
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public string Content { get; set; } = string.Empty;        
+        public string Content { get; set; } = string.Empty;
         public string? ThumbnailLink { get; set; }
         public List<int>? Groups { get; set; }
         public List<int>? Categories { get; set; }

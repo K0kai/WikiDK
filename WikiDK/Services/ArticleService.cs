@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 using WikiDK.Controllers;
 using WikiDK.Objects;
 using WikiDK.Repositories;
@@ -42,7 +41,7 @@ namespace WikiDK.Services
                 ThumbnailLink = request.ThumbnailLink,
                 Categories = request.Categories ?? []
             };
-            
+
             if (article.AuthorId == 0)
                 throw new Exception("Invalid author Id");
             // Add article to the database and save changes
@@ -248,7 +247,7 @@ namespace WikiDK.Services
         public async Task<Article?> ProcessSubmission(int submissionId, User reviewer)
         {
             var submission = await _dbContext.ArticleSubmissions.FindAsync(submissionId) ?? throw new Exception("Submission does not exist");
-            
+
             Article article;
 
             if (submission.Status != "pending")
@@ -279,7 +278,7 @@ namespace WikiDK.Services
                         Groups = submission.Groups,
                         Categories = submission.Categories
                     };
-                    article = await Update(submission.ArticleId ?? -1, submission.SubmitterId ?? -1, updateArticle);                    
+                    article = await Update(submission.ArticleId ?? -1, submission.SubmitterId ?? -1, updateArticle);
                     break;
                 default:
                     throw new Exception($"Unhandled case: {submission.Type}");
@@ -313,7 +312,7 @@ namespace WikiDK.Services
         }
         public async Task<int> GetTotalSubmissionPages(string status, string? type = "any")
         {
-            var maxPages = (int) Math.Max(1, Math.Ceiling((double) (await GetSubmissionsCount(status, type) / maxSubmissionPageSize) ));
+            var maxPages = (int)Math.Max(1, Math.Ceiling((double)(await GetSubmissionsCount(status, type) / maxSubmissionPageSize)));
             return maxPages;
         }
         public async Task<List<ArticleSubmission>> GetPaginatedArticleSubmissions(int page, string status, string? type = "any")
@@ -322,7 +321,7 @@ namespace WikiDK.Services
             return await query.ToListAsync();
         }
         public async Task<int> GetSubmissionsCount(string status, string? type = "any")
-        {            
+        {
             return await _dbContext.ArticleSubmissions.Where(a => a.Status == status && (type == "any" || a.Type == type)).CountAsync();
         }
     }

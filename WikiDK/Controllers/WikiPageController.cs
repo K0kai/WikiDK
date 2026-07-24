@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using WikiDK.Objects;
-using WikiDK.Services;
 using WikiDK.Services.Interfaces;
 
 namespace WikiDK.Controllers
@@ -29,8 +27,9 @@ namespace WikiDK.Controllers
                 }
                 return Ok(page);
             }
-            catch {
-            return NotFound();
+            catch
+            {
+                return NotFound();
             }
         }
         [HttpPost]

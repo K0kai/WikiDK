@@ -19,9 +19,9 @@ namespace WikiDK.Objects
         public string Title { get; set; } = string.Empty;
         [MaxLength(100)]
         [Column("description")]
-        public string? Description { get; set;  } = string.Empty;
+        public string? Description { get; set; } = string.Empty;
         [Column("content")]
-        public string? Content {  get; set; } = string.Empty;
+        public string? Content { get; set; } = string.Empty;
         [Column("thumbnail_link")]
         public string? ArticleThumbnail { get; set; } = string.Empty;
         [Column("submitter_id")]
