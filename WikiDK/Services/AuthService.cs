@@ -7,7 +7,7 @@ namespace WikiDK.Services
 {
     public class AuthService : IAuthService
     {
-        private UserService _userServiceContext;
+        private readonly UserService _userServiceContext;
         public AuthService(UserService userServiceContext)
         {
             _userServiceContext = userServiceContext;
@@ -15,6 +15,7 @@ namespace WikiDK.Services
         public string Login(string username, string password)
         {
             var user = _userServiceContext.GetByName(username).Result ?? throw new Exception($"User with username '{username}' not found");
+            var roles = _userServiceContext.GetUserAndRoles(user.Id).Result.Roles;
 
             if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
                 throw new Exception("Password is incorrect");

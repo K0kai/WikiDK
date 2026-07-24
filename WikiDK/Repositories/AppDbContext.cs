@@ -49,8 +49,35 @@ namespace WikiDK.Repositories
                 v => v.Trim().ToLowerInvariant(),
                 v => v);
 
+            modelBuilder.Entity<PolicyPermissionRelation>()
+                .HasKey(pp => new { pp.PolicyId, pp.PermissionId });
+
+            modelBuilder.Entity<PolicyPermissionRelation>()
+                .HasOne(pp => pp.Policy)
+                .WithMany(p => p.PoliciesPermissions)
+                .HasForeignKey(pp => pp.PolicyId);
+
+            modelBuilder.Entity<PolicyPermissionRelation>()
+                .HasOne(pp => pp.Permission)
+                .WithMany(p => p.PoliciesPermissions)
+                .HasForeignKey(pp => pp.PermissionId);
+
+            modelBuilder.Entity<UserRoleRelation>()
+           .HasKey(ur => new { ur.UserId, ur.RoleId });
+
+            modelBuilder.Entity<UserRoleRelation>()
+                .HasOne(ur => ur.User)
+                .WithMany(u => u.UserRoles)
+                .HasForeignKey(ur => ur.UserId);
+
+            modelBuilder.Entity<UserRoleRelation>()
+           .HasOne(ur => ur.Role)
+           .WithMany(r => r.UserRoles)
+           .HasForeignKey(ur => ur.RoleId);
+
             base.OnModelCreating(modelBuilder);
         }
+
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

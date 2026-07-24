@@ -1,14 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.Text.Json.Serialization;
 
 namespace WikiDK.Objects
 {
     public class PolicyPermissionRelation
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Key]
-        public int Id { get; set; }
         public int PolicyId { get; set; }
         public int PermissionId { get; set; }
+        [JsonIgnore]
+        public Policy Policy { get; set; } = null!;
+        [JsonIgnore]
+        public Permission Permission { get; set; } = null!;
     }
 }

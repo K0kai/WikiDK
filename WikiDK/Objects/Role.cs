@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace WikiDK.Objects
 {
@@ -15,6 +16,8 @@ namespace WikiDK.Objects
         public string Description { get; set; } = string.Empty;
         public DateTimeOffset CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTimeOffset UpdatedAt { get; set; } = DateTime.UtcNow;
+        [JsonIgnore]
+        public ICollection<UserRoleRelation> UserRoles { get; set; } = [];
         public int CreatedBy { get; set; }
         public int UpdatedBy { get; set; }
     }

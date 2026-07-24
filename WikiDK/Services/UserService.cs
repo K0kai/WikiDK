@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Dynamic;
 using WikiDK.Controllers;
 using WikiDK.Objects;
 using WikiDK.Repositories;
@@ -12,6 +13,15 @@ namespace WikiDK.Services
         public UserService(AppDbContext context)
         {
             _context = context;
+        }
+        public async Task<dynamic> GetUserAndRoles(int id)
+        {
+            var user = await GetById(id) ?? throw new Exception("User is null");
+            var roles = await _context.UsersRoles.Where(ur => ur.UserId == id).ToListAsync();
+            dynamic response = new ExpandoObject();
+            response.User = user;
+            response.Roles = roles;
+            return response;
         }
         public async Task<User?> GetById(int id)
         {

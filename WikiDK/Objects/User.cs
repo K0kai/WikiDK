@@ -24,6 +24,8 @@ namespace WikiDK.Objects
         [Column("password_salt")]
         [JsonIgnore]
         public byte[] PasswordSalt { get; set; } = [];
+        [JsonIgnore]
+        public ICollection<UserRoleRelation> UserRoles { get; set; } = new List<UserRoleRelation>();
         [Column("role")]
         public UserRole Role { get; set; } = UserRole.Guest;
         [Column("user_icon")]
