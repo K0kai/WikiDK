@@ -75,6 +75,20 @@ namespace WikiDK.Repositories
            .WithMany(r => r.UserRoles)
            .HasForeignKey(ur => ur.RoleId);
 
+            modelBuilder.Entity<RolePolicyRelation>()
+                .HasOne(rp => rp.Role)
+                .WithMany(r => r.RolePolicies)
+                .HasForeignKey(rp => rp.RoleId);
+
+            modelBuilder.Entity<RolePolicyRelation>()
+                .HasOne(rp => rp.Policy)
+                .WithMany(r => r.RolePolicies)
+                .HasForeignKey(rp => rp.PolicyId);
+
+            modelBuilder.Entity<RolePolicyRelation>()
+                .HasKey(rp => new { rp.PolicyId, rp.RoleId });
+
+
             base.OnModelCreating(modelBuilder);
         }
 

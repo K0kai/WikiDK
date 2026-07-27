@@ -1,9 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace WikiDK.Objects
 {
+    [Index(nameof(Name), IsUnique = true)]
     public class Policy
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -18,5 +20,7 @@ namespace WikiDK.Objects
         public DateTimeOffset UpdatedAt { get; private set; } = DateTime.UtcNow;
         [JsonIgnore]
         public ICollection<PolicyPermissionRelation> PoliciesPermissions { get; set; } = [];
+        [JsonIgnore]
+        public ICollection<RolePolicyRelation> RolePolicies { get; set; } = [];
     }
 }

@@ -9,8 +9,7 @@ namespace WikiDK.Services.Interfaces
         public Task<WikiPage?> GetWikiPageBySlug(string slug);
         public Task<List<WikiPage>> GetAllWikiPagesAsync();
         public Task<WikiPage> CreateWikiPageAsync(WikiPageCreateRequest request);
-        public bool DeleteWikiPage(int id);
-        public bool DeleteWikiPage(string slug);
+        public bool DeleteWikiPage(string slugOrId);
         public bool UpdateWikiPage(int id, WikiPageUpdateRequest request);
         public bool UpdateWikiPage(string slug, WikiPageUpdateRequest request);
     }

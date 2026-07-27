@@ -7,6 +7,19 @@ namespace WikiDK.Services
 {
     public class RoleService(AppDbContext dbContext) : IRoleService 
     {
+        public async Task<bool> CreateRole(RoleCreateRequest request)
+        {
+            var now = DateTimeOffset.UtcNow;
+            var role = new Role
+            {
+                Name = request.Name,
+                Description = request.Description ?? "",
+                CreatedAt = now,
+                CreatedBy = request.User!.Id
+            };
+            return true;
+        }
+
         public async Task<Role?> GetRoleById(int id)
         {
             return await dbContext.Roles.FindAsync(id);

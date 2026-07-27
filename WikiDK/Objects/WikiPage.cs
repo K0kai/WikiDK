@@ -1,8 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WikiDK.Objects
 {
+    [Index(nameof(Slug), IsUnique = true)]
     public class WikiPage
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -42,7 +44,7 @@ namespace WikiDK.Objects
     {
         public string Title { get; set; } = string.Empty;
         public string? Content { get; set; } = string.Empty;
-        public int AuthorId { get; set; }
+        public User? Author { get; set; }
         public string AuthorName { get; set; } = null!;
     }
 
@@ -50,6 +52,6 @@ namespace WikiDK.Objects
     {
         public string Title { get; set; } = string.Empty;
         public string? Content { get; set; } = string.Empty;
-        public int EditorId { get; set; }
+        public User? Editor { get; set; }
     }
 }

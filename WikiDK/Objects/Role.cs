@@ -18,7 +18,15 @@ namespace WikiDK.Objects
         public DateTimeOffset UpdatedAt { get; set; } = DateTime.UtcNow;
         [JsonIgnore]
         public ICollection<UserRoleRelation> UserRoles { get; set; } = [];
+        public ICollection<RolePolicyRelation> RolePolicies { get; set; } = [];
         public int CreatedBy { get; set; }
         public int UpdatedBy { get; set; }
+    }
+
+    public class RoleCreateRequest
+    {
+        public string Name { get; set; } = null!;
+        public string? Description { get; set; } = null!;
+        public User? User { get; set; }
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using WikiDK;
+using WikiDK.Helpers;
 using WikiDK.Repositories;
 using WikiDK.Services;
 using WikiDK.Services.Interfaces;
@@ -20,6 +21,7 @@ builder.Services.AddScoped<CloudinaryService>();
 builder.Services.AddScoped<RankService>();
 builder.Services.AddScoped<PageService>();
 builder.Services.AddScoped<UserCacheService>();
+builder.Services.AddScoped(typeof(LoggerHelper<>), typeof(LoggerHelper<>));
 builder.Services.AddScoped<IWikiPageService, WikiPageService>();
 builder.Services.AddTransient<IClaimsTransformation, UserClaimsTransformation>();
 

@@ -8,6 +8,7 @@ namespace WikiDK.Services.Interfaces
         public Task<Role?> GetRoleById(string id);
         public Task<ICollection<Role>> GetRoles();
         public Task<ICollection<Role>> GetRolesByUserId(int userId);
+        public Task<bool> CreateRole(RoleCreateRequest request); 
 
     }
 }
