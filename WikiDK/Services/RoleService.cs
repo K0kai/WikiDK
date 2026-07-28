@@ -15,8 +15,11 @@ namespace WikiDK.Services
                 Name = request.Name,
                 Description = request.Description ?? "",
                 CreatedAt = now,
-                CreatedBy = request.User!.Id
+                CreatedBy = request.User!.Id,
+                UpdatedBy = null
             };
+            dbContext.Roles.Add(role);
+            dbContext.SaveChanges();
             return true;
         }
 

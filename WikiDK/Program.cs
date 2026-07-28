@@ -23,6 +23,7 @@ builder.Services.AddScoped<PageService>();
 builder.Services.AddScoped<UserCacheService>();
 builder.Services.AddScoped(typeof(LoggerHelper<>), typeof(LoggerHelper<>));
 builder.Services.AddScoped<IWikiPageService, WikiPageService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddTransient<IClaimsTransformation, UserClaimsTransformation>();
 
 builder.Services.AddMemoryCache();

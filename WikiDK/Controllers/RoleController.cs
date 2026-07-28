@@ -10,6 +10,12 @@ namespace WikiDK.Controllers
     [ApiController]
     public class RoleController(IRoleService roleService, UserService userService) : ControllerBase
     {
+        [HttpGet]
+        public async Task<IActionResult> GetRoles()
+        {
+            var roles = await roleService.GetRoles();
+            return Ok(roles);
+        }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetRoleById(int id)
         {
