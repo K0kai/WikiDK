@@ -46,5 +46,19 @@ namespace WikiDK.Services
             var userQuery = await dbContext.Users.Where(u => u.Id == userId).SelectMany(u => u.UserRoles.Select(ur => ur.Role)).ToListAsync();
             return userQuery;
         }
+
+        public async Task<bool> UpdateRole(RoleUpdateRequest uRequest)
+        {
+            if (uRequest.User == null)
+                throw new Exception("User cannot be null");
+
+            var role = dbContext.Roles.Find(uRequest.Id) ?? throw new Exception("Role not found");
+            role.Name = uRequest.Name;
+            role.Description = uRequest.Description ?? role.Description;
+            role.UpdatedAt = DateTimeOffset.UtcNow;
+            role.UpdatedBy = uRequest.User.Id;
+
+            return true;
+        }
     }
 }

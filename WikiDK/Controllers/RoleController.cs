@@ -35,5 +35,17 @@ namespace WikiDK.Controllers
             _ = await roleService.CreateRole(request);
             return NoContent();
         }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateRole([FromBody] RoleUpdateRequest uRequest)
+        {
+            _ = int.TryParse(User.FindFirstValue(claimType: ClaimTypes.NameIdentifier), out var userId);
+            var user = await userService.GetById(userId);
+            if (user == null)
+                return BadRequest("Invalid user");
+            uRequest.User = user;
+
+            _ = await roleService.UpdateRole(uRequest);
+            return NoContent();
+        }
     }
 }
